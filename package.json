@@ -24,6 +24,7 @@
     "less": "^4.4.0",
     "less-loader": "^12.3.0",
     "naive": "^0.0.0",
+    "uuid": "^11.1.0",
     "vue-router": "^4.5.1"
   },
   "devDependencies": {

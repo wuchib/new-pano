@@ -33,7 +33,8 @@
       <!-- 功能面板 -->
       <section class="flex-1 h-full overflow-y-hidden">
         <!-- 热点 -->
-        <HotspotBoard v-if="curFunc === 'hotspot'" @checkHs="checkHs" />
+        <HotspotBoard ref="HotspotBoardRef" v-if="curFunc === 'hotspot'" @checkHs="checkHs"
+          @changeHsConfig="changeHsConfig" />
         <!-- 其他功能面板可以在这里添加 -->
       </section>
     </aside>
@@ -43,13 +44,20 @@
 <script setup>
 import { onMounted, ref } from 'vue'
 import useFooterToggle from './useFooterToggle'
-import { initKrapno } from '../../utils/krpano'
+// import { initKrapno } from '../../utils/krpano'
 import HotspotBoard from './board/hotspot.vue'
 import krpanoUrils from '@renderer/utils/krpano/index.js'
-
-const { CommonHs } = krpanoUrils
-let krpano = null
-const panoViewerRef = ref(null)
+import { v4 as uuidv4 } from 'uuid';
+import { useMessage } from 'naive-ui'
+const message = useMessage()
+const {
+  initPanorama,
+  Scene,
+  View,
+  CommonHs,
+  PolygonHs,
+  Event
+} = krpanoUrils
 const {
   isShowP,
   slideMainStyle,
@@ -57,6 +65,22 @@ const {
   slideIconStyle,
   transition
 } = useFooterToggle()
+const panoViewerRef = ref(null)
+/** 一些实例 */
+let krpano = null // krpano 全景接口
+let sceneInstance = null  // 场景实例
+let viewInstance = null // 视角实例
+let commonHsInstance = null // 普通热点实例
+let polygonHsInstance = null  // 多边形绘制热点实例
+let eventInstance = null
+/** 一些实例 */
+
+/** 组件实例 */
+const HotspotBoardRef = ref()
+/** 组件实例 */
+
+
+
 const curFunc = ref('hotspot') // 当前选中的功能
 const funcList = ref([
   { id: 'base', icon: 'i-ri:article-line', label: '基础' },
@@ -70,34 +94,50 @@ function togglePhotoList() {
 }
 
 onMounted(async () => {
-  krpano = await initKrapno(panoViewerRef.value)
-  const url = new URL(`../../assets/img/panoPhoto.jpg`, import.meta.url).href;
-  loadimage(url);
+  await initKrpanoInstance()
+  const sceneId = uuidv4()
+  const imgUrl = new URL(`../../assets/img/panoPhoto.jpg`, import.meta.url).href;
+  sceneInstance.addSceneInKp({ sceneId, imgUrl })
+  await sceneInstance.loadSceneAsync(sceneId)
+  eventInstance.registerEvent('onclick', () => { addHotspot() })
 })
 
-function loadimage(url) {
-  krpano.image.reset();
-  krpano.image.sphere = { url };
-  krpano.actions.loadpanoimage("RESET", "BLEND(0.35)");
-  krpano.actions.lookat(30, 0, 100);
-
-  krpano.events.addListener("onclick",()=>{
-    const hs = krpano.addhotspot('demo_hs1')
-		const p = krpano.screentosphere(krpano.mouse.x, krpano.mouse.y);
-    hs.setvars({
-      distorted: false, dragging: true, renderer:'webgl',
-      url: curHs.value.url, ath: p.x, atv: p.y,
-      scale:1, alpha:1, zorder:1,
-    })
-  })
+// 初始化krpano工具实例
+async function initKrpanoInstance() {
+  krpano = await initPanorama(panoViewerRef.value)
+  sceneInstance = new Scene(krpano)
+  viewInstance = new View(krpano)
+  commonHsInstance = new CommonHs(krpano)
+  polygonHsInstance = new PolygonHs(krpano)
+  eventInstance = new Event(krpano)
 }
 
+let targetEntity = null
+// 添加热点
+function addHotspot() {
+  if (curHs.value === null) {
+    message.warning('未选择热点')
+    return
+  }
+  const { url } = curHs.value
+  const id = uuidv4()
+  const { title: txt, fontSize, fontColor } = HotspotBoardRef.value.getHsConfig()
+  targetEntity = commonHsInstance.addHotspot({ id, url, txt })
+}
 
 
 /** 热点操作 */
 const curHs = ref(null)
 function checkHs(hs) {
   curHs.value = hs
+}
+
+// 改变热点配置
+function changeHsConfig({ title, fontSize, fontColor:color }) {
+  // targetHs.name
+  const { _hs, _tip } = targetEntity
+  console.log(fontSize,'fontSize');
+  commonHsInstance.addTip(_hs.name, title ,{ fontSize, color })
 }
 </script>
 

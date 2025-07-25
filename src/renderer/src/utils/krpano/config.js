@@ -3,7 +3,7 @@ export default ()=> {
     const SCROLL = 'scroll_'
     return {
         // 模板文件
-        TEMPLATE_XML: 'tour.xml', 
+        TEMPLATE_XML: '/src/libs/krpano/krpano.xml', 
 
         // 插件路径
         PLUGIN_URL: '/krpano/plugin', 

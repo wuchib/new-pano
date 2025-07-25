@@ -12,4 +12,8 @@ export default defineConfig({
       },
     }),
   ],
+  shortcuts: [
+    ['sub-title', 'text-[#fff]/65 text-[14px] font-400 mb-[8px] mt-[8px]'],
+    ['frame', 'pb-[16px] border-b-solid border-[1px] border-[#35363B]'],
+  ],
 })

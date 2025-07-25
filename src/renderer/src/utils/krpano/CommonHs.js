@@ -83,7 +83,7 @@ class CommonHs{
     * - backgroundalpha: 热点文字标注背景透明度。
     * @returns {undefined} 
     */
-    addHotspot({ id, url, x, y, backgroundalpha, backgroundcolor, txt, ath, atv }){
+    addHotspot({ id, url, x = this.krpano.mouse.x, y = this.krpano.mouse.y, backgroundalpha, backgroundcolor, txt, ath, atv }){
         const hotspotName = PREFIXX_HS + id
         let hh, vv
         const { x: h, y: v } = this.krpano.actions.screentosphere(x, y)
@@ -93,7 +93,7 @@ class CommonHs{
         hs.setvars({
             distorted: false, dragging: true, renderer:'webgl',
             url, ath: hh, atv: vv,
-            scale:1, alpha:1, zorder:1,
+            scale:.4, alpha:1, zorder:1,
         })   
         const tip = this.addTip(hotspotName, txt, {}, backgroundalpha, backgroundcolor)
         this.setEditRect(id)
