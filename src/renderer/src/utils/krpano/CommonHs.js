@@ -243,8 +243,10 @@ class CommonHs{
         const hs = this.krpano.hotspot.getArray().find(item => item.name.includes(id) && !item.name.includes(TIP))
         const h = hs ? hs.ath : 0
         const v = hs ? hs.atv : 0
-        const rectw = Math.max((hs ? Number(hs.width) : 0) + 15,60)
-        const recth = Math.max((hs ? Number(hs.height) : 0) + 15,60)
+        // const rectw = Math.max((hs ? Number(hs.width) : 0) + 15,60)
+        // const recth = Math.max((hs ? Number(hs.height) : 0) + 15,60)
+        const rectw = 60
+        const recth = 60
         if(existEditRect){
             existEditRect.setvars({
                 ath: h, atv: v, visible: isShow, width: rectw, height: recth,

@@ -51,6 +51,10 @@ app.whenReady().then(() => {
 
   // IPC test
   ipcMain.on('ping', () => console.log('pong'))
+  ipcMain.on('overlay-dblclick', () => {
+    console.log('✅ 子窗口捕获并上报了双击事件')
+    mainWin.webContents.send('dblclick-from-overlay') // 你可以进一步发给主窗口 UI 层
+  })
 
   createWindow()
 
@@ -72,3 +76,56 @@ app.on('window-all-closed', () => {
 
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and require them here.
+
+
+
+
+// let childWin = null
+
+// function createChildWindow() {
+//   const { screen } = require('electron')
+//   const display = screen.getPrimaryDisplay()
+//   const { width, height } = display.bounds
+
+//   childWin = new BrowserWindow({
+//     width,
+//     height,
+//     x: 0,
+//     y: 0,
+//     frame: false,            // 无边框
+//     transparent: true,       // 透明窗口
+//     resizable: false,
+//     movable: false,
+//     fullscreen: true,
+//     skipTaskbar: true,       // 不显示在任务栏
+//     alwaysOnTop: true,       // 保持在最前
+//     hasShadow: false,
+//     focusable: false,        // 防止聚焦（配合点击穿透）
+//     webPreferences: {
+//       preload: join(__dirname, '../preload/index.js'),
+//       nodeIntegration: true,
+//       contextIsolation: false,
+//     }
+//   })
+
+//   // 加载窗口内容
+//   // childWin.loadFile('renderer.html')
+//   childWin.loadFile(join(__dirname, '../renderer/childindex.html'))
+//   // 设置忽略鼠标事件，允许事件传递给下面窗口
+//   childWin.setIgnoreMouseEvents(true, { forward: true })
+
+//   // 开发调试可开启
+//   // childWin.webContents.openDevTools()
+// }
+
+// app.whenReady().then(() => {
+//   createChildWindow()
+
+//   app.on('activate', function () {
+//     if (BrowserWindow.getAllWindows().length === 0) createChildWindow()
+//   })
+// })
+
+// app.on('window-all-closed', function () {
+//   if (process.platform !== 'darwin') app.quit()
+// })
