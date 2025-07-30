@@ -1,57 +1,21 @@
 <template>
-  <CommonList 
-    :list="hsList"
-    title="热点"
-    add-btn-txt="添加热点"
-    :is-hs-add-edit="isHsAddEdit"
-    :isShowCheckBoxs="isShowCheckBoxs"
-    @goback="goBack"
-    @handleBatchDel="handleBatchDel"
-    @editItem="editHs"
-    @bacthDel="bacthDel"
-    @enterAdd="enterAddHotspot"
-  >
+  <CommonList :list="graphicsList" title="绘制图形" add-btn-txt="开始绘制" :is-hs-add-edit="isHsAddEdit"
+    :isShowCheckBoxs="isShowCheckBoxs" @goback="goBack" @handleBatchDel="handleBatchDel" @editItem="editHs"
+    @bacthDel="bacthDel" @enterAdd="enterAddHotspot">
     <template #detail>
       <!-- 选择图标 -->
       <section class="frame">
         <h1 class="sub-title">选择图标</h1>
         <section class="grid grid-cols-3 gap-[4px]">
           <div class="h-[68px] flex flex-col justify-center items-center rounded-[4px] cursor-pointer "
-            :class="config.url === hs.url ? 'bg-[#0099FF]/15 text-[#008AFF]' : 'hover:bg-[#2A2B30] text-[#fff]'"
+            :class="config.iconId === hs.id ? 'bg-[#0099FF]/15 text-[#008AFF]' : 'hover:bg-[#2A2B30] text-[#fff]'"
             v-for="hs in hsIconOpt" :key="hs.id" @click="checkHsUrl(hs)">
-            <img class="w-[48px] h-[32px]" :src="hs.url" alt="">
-            <span> GIF </span>
+            <!-- <img class="w-[48px] h-[32px]" :src="hs.url" alt=""> -->
+            <i :class="hs.icon"></i>
+            <span> {{ hs.txt }} </span>
           </div>
         </section>
       </section>
-      <!-- 输入标题、选择字号、字体颜色 -->
-      <section class="frame">
-        <section class="items-center">
-          <h1 class="sub-title">标题</h1>
-          <n-input v-model:value="config.title" placeholder="请输入标题"></n-input>
-        </section>
-        <section class="items-center">
-          <h1 class="sub-title">字号</h1>
-          <n-select clearable placeholder="请选择字号" v-model:value="config.fontSize" :options="fontSizeOpt" />
-        </section>
-        <section class="items-center">
-          <h1 class="sub-title">字体颜色</h1>
-          <n-select :render-label="colorRender" clearable placeholder="请选择字体颜色" v-model:value="config.fontColor"
-            :options="fontColorOpt" />
-        </section>
-        <section class="items-center">
-          <h1 class="sub-title">位置</h1>
-          <section class="flex gap-[8px]">
-            <n-input-number readonly class="flex-1" placeholder="" v-model:value="config.ath"></n-input-number>
-            <n-input-number readonly class="flex-1" placeholder="" v-model:value="config.atv"></n-input-number>
-          </section>
-        </section>
-      </section>
-      <!-- 保存和删除按钮 -->
-      <footer class="flex items-center w-full gap-[8px]">
-        <n-button class="flex-1" @click="save">保存</n-button>
-        <n-button class="flex-1" @click="del">删除</n-button>
-      </footer>
     </template>
   </CommonList>
 </template>
@@ -81,19 +45,19 @@ const message = useMessage()
 
 const isHsAddEdit = inject('isHsAddEdit', false) // 接收上级组件的状态，代表是否正在添加或者编辑热点
 const isEdit = inject('isEdit', false) // 接收上级组件的状态，代表是否正在编辑热点
-const hsList = inject('hsList', []) // 接收上级组件的热点列表
+const graphicsList = inject('graphicsList', []) // 接收上级组件的热点列表
 // 热点图标选项
 const hsIconOpt = ref([
-  { id: '1', url: forward, txt: '', },
-  { id: '2', url: leftForward, txt: '', },
-  { id: '3', url: rightForward, txt: '', },
-  { id: '4', url: point, txt: '', },
-  { id: '5', url: turnLeft, txt: '', },
-  { id: '6', url: turnRight, txt: '', },
+  { id: '1', icon: 'i-ri:checkbox-blank-line', txt: '矩形', },
+  { id: '2', icon: 'i-ri:edit-circle-line', txt: '椭圆', },
+  { id: '3', icon: 'i-ri:mark-pen-line', txt: '画笔', },
+  { id: '4', icon: 'i-ri:chat-4-line', txt: '气泡框', },
+  { id: '5', icon: 'i-ri:subtract-line', txt: '线段', },
+  { id: '6', icon: 'i-ri:arrow-left-up-line', txt: '箭头', },
 ])
 
 const isShowCheckBoxs = ref(false)
-watch(() => hsList.value, (val) => {
+watch(() => graphicsList.value, (val) => {
   if (val.filter(hs => hs.isChecked).length === 0) isShowCheckBoxs.value = false
 })
 function handleBatchDel() {
@@ -101,7 +65,7 @@ function handleBatchDel() {
 }
 
 function checkHsUrl(hs) {
-  config.value.url = hs.url
+  config.value.iconId = hs.id
 }
 
 function enterAddHotspot() {
@@ -117,7 +81,8 @@ const config = ref({
   fontSize: '12px',
   fontColor: '#FFFFFF',
   ath: 0,// 位置信息（水平方向的角度）
-  atv: 0// 位置信息（垂直方向的角度）
+  atv: 0,// 位置信息（垂直方向的角度）
+  iconId:'1'
 })
 
 // 字体下拉选项
