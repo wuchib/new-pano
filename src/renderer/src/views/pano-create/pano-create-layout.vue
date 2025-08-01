@@ -37,9 +37,9 @@
           @saveHs="saveHs" @delHs="delHs" @editHs="editHs" @restoreHs="restoreHs" @goBack="goBack"
           @bacthDel="bacthDelHs" />
         <!-- 图形绘制面板 -->
-        <PaintBoard v-if="curFunc === 'mark'" @changeHsConfig="changeGraphicsConfig" @saveHs="saveGraphics"
-          @delHs="delGraphics" @editHs="editGraphics" @restoreHs="restoreGraphics" @goBack="goBack"
-          @bacthDel="bacthDelGraphics" />
+        <PaintBoard ref="paintBoardRef" v-if="curFunc === 'mark'" @changeHsConfig="changeGraphicsConfig"
+          @saveHs="saveGraphics" @delHs="delGraphics" @editHs="editGraphics" @restoreHs="restoreGraphics"
+          @goBack="goBack" @bacthDel="bacthDelGraphics" />
         <!-- 其他功能面板可以在这里添加 -->
       </section>
     </aside>
@@ -89,8 +89,9 @@ let eventInstance = null
 /** 一些实例 */
 
 const HotspotBoardRef = ref()
+const paintBoardRef = ref()
 
-const curFunc = ref('hotspot') // 当前选中的功能
+const curFunc = ref('mark') // 当前选中的功能
 const funcList = ref([
   { id: 'base', icon: 'i-ri:article-line', label: '基础' },
   { id: 'angle', icon: 'i-ri:eye-line', label: '视角' },
@@ -132,7 +133,7 @@ const {
   setInstance: setInsGra,
   graphicsDragCb,
 } = useGraphics({
-  HotspotBoardRef,
+  paintBoardRef,
   isEdit,
   isHsAddEdit,
   curEntity,
@@ -150,7 +151,19 @@ onMounted(async () => {
   const imgUrl = new URL(`../../assets/img/panoPhoto.jpg`, import.meta.url).href;
   sceneInstance.addSceneInKp({ sceneId, imgUrl })
   await sceneInstance.loadSceneAsync(sceneId)
-  eventInstance.registerEvent('onclick', () => { addHotspot() })
+  eventInstance.registerEvent('onclick', () => { if (curFunc.value === 'hotspot') addHotspot() })
+  eventInstance.registerEvent('ondown', () => {
+    polygonHsInstance.setIsDown(true)
+    polygonHsInstance.setIsForbit(false)
+    addGraphics()
+  })
+  eventInstance.registerEvent('onup', () => {
+    polygonHsInstance.setIsDown(false)
+    polygonHsInstance.setIsForbit(true)
+    const { title, fontSize, fontColor, borderSize, paintType } = paintBoardRef.value.getConfig()
+    polygonHsInstance.drawControlPoints(curEntityId.value, paintType)
+    curEntity.value._tip = polygonHsInstance.setPolygonTip(curEntityId.value, { title, titleFontSize: fontSize }, paintType)
+  })
 })
 
 // 初始化krpano工具实例
@@ -164,6 +177,10 @@ async function initKrpanoInstance() {
   setInsHs({
     _commonHsInstance: commonHsInstance,
     _viewInstance: viewInstance,
+  })
+  setInsGra({
+    _polygonHsInstance: polygonHsInstance,
+    _viewInstance: viewInstance
   })
 }
 

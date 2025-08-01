@@ -8,14 +8,39 @@
         <h1 class="sub-title">选择图标</h1>
         <section class="grid grid-cols-3 gap-[4px]">
           <div class="h-[68px] flex flex-col justify-center items-center rounded-[4px] cursor-pointer "
-            :class="config.iconId === hs.id ? 'bg-[#0099FF]/15 text-[#008AFF]' : 'hover:bg-[#2A2B30] text-[#fff]'"
+            :class="config.paintType === hs.id ? 'bg-[#0099FF]/15 text-[#008AFF]' : 'hover:bg-[#2A2B30] text-[#fff]'"
             v-for="hs in hsIconOpt" :key="hs.id" @click="checkHsUrl(hs)">
-            <!-- <img class="w-[48px] h-[32px]" :src="hs.url" alt=""> -->
             <i :class="hs.icon"></i>
-            <span> {{ hs.txt }} </span>
+            <span class="mt-[8px]"> {{ hs.txt }} </span>
           </div>
         </section>
       </section>
+      <!-- 输入标题、选择字号、选择边框颜色、选择边框粗细 -->
+      <section class="frame">
+        <section class="items-center">
+          <h1 class="sub-title">标题</h1>
+          <n-input v-model:value="config.title" placeholder="请输入标题"></n-input>
+        </section>
+        <section class="items-center">
+          <h1 class="sub-title">字号</h1>
+          <n-select clearable placeholder="请选择字号" v-model:value="config.fontSize" :options="fontSizeOpt" />
+        </section>
+        <section class="items-center">
+          <h1 class="sub-title">边框颜色</h1>
+          <n-select :render-label="colorRender" clearable placeholder="请选择边框颜色" v-model:value="config.borderColor"
+            :options="borderColorOpt" />
+        </section>
+        <section class="items-center">
+          <h1 class="sub-title">边框粗细</h1>
+          <n-select :render-label="colorRender" clearable placeholder="请选择边框粗细" v-model:value="config.borderSize"
+            :options="borderSizeOpt" />
+        </section>
+      </section>
+      <!-- 保存和删除按钮 -->
+      <footer class="flex items-center w-full gap-[8px]">
+        <n-button class="flex-1" @click="save">保存</n-button>
+        <n-button class="flex-1" @click="del">删除</n-button>
+      </footer>
     </template>
   </CommonList>
 </template>
@@ -31,6 +56,12 @@ import turnLeft from '@renderer/assets/img/hs/turn-left.png'
 import turnRight from '@renderer/assets/img/hs/turn-right.png'
 import { useMessage, useDialog } from 'naive-ui'
 import CommonList from '../common-list.vue'
+const props = defineProps({
+  beforeChangePaintType: {
+    type: [Function, null],
+    default: null
+  }
+})
 const emits = defineEmits([
   'changeHsConfig',
   'saveHs',
@@ -48,12 +79,12 @@ const isEdit = inject('isEdit', false) // 接收上级组件的状态，代表�
 const graphicsList = inject('graphicsList', []) // 接收上级组件的热点列表
 // 热点图标选项
 const hsIconOpt = ref([
-  { id: '1', icon: 'i-ri:checkbox-blank-line', txt: '矩形', },
-  { id: '2', icon: 'i-ri:edit-circle-line', txt: '椭圆', },
-  { id: '3', icon: 'i-ri:mark-pen-line', txt: '画笔', },
-  { id: '4', icon: 'i-ri:chat-4-line', txt: '气泡框', },
-  { id: '5', icon: 'i-ri:subtract-line', txt: '线段', },
-  { id: '6', icon: 'i-ri:arrow-left-up-line', txt: '箭头', },
+  { id: 'rect', icon: 'i-ri:checkbox-blank-line', txt: '矩形', },
+  { id: 'circle', icon: 'i-ri:edit-circle-line', txt: '椭圆', },
+  { id: 'brush', icon: 'i-ri:mark-pen-line', txt: '画笔', },
+  { id: 'mark', icon: 'i-ri:chat-4-line', txt: '气泡框', },
+  { id: 'line', icon: 'i-ri:subtract-line', txt: '线段', },
+  { id: 'arrow', icon: 'i-ri:arrow-left-up-line', txt: '箭头', },
 ])
 
 const isShowCheckBoxs = ref(false)
@@ -64,8 +95,15 @@ function handleBatchDel() {
   isShowCheckBoxs.value = !isShowCheckBoxs.value
 }
 
-function checkHsUrl(hs) {
-  config.value.iconId = hs.id
+async function checkHsUrl(hs) {
+  if (props.beforeChangePaintType === null) {
+    config.value.paintType = hs.id
+    return
+  }
+
+  await props.beforeChangePaintType().catch(() => {
+    
+  })
 }
 
 function enterAddHotspot() {
@@ -74,29 +112,33 @@ function enterAddHotspot() {
 }
 
 
-// 热点配置
+// 图形配置
 const config = ref({
-  url: forward,
   title: '默认热点',
-  fontSize: '12px',
-  fontColor: '#FFFFFF',
-  ath: 0,// 位置信息（水平方向的角度）
-  atv: 0,// 位置信息（垂直方向的角度）
-  iconId:'1'
+  fontSize: '12',
+  paintType: 'rect',
+  borderColor: '#FFFFFF',
+  borderSize: 2
 })
 
-// 字体下拉选项
+
+// 字体大小下拉选项
 const fontSizeOpt = ref([
-  { label: '12px', value: '12px' },
-  { label: '14px', value: '14px' },
-  { label: '16px', value: '16px' },
+  { label: '12px', value: '12' },
+  { label: '14px', value: '14' },
+  { label: '16px', value: '16' },
+])
+// 边框粗细下拉选项
+const borderSizeOpt = ref([
+  { label: '2px', value: 2 },
+  { label: '4px', value: 4 },
+  { label: '6px', value: 6 },
 ])
 
 const colorRender = (option) => h('div', { style: { color: option.value } }, option.label)
 
-
 // 字体颜色选项
-const fontColorOpt = ref([
+const borderColorOpt = ref([
   { label: '默认', value: '#FFFFFF' },
   { label: '柔和红', value: '#FF6B6B' },
   { label: '亮黄', value: '#FFD93D' },
@@ -110,11 +152,17 @@ const fontColorOpt = ref([
 watch([
   () => config.value.title,
   () => config.value.fontSize,
-  () => config.value.fontColor,
-  () => config.value.url,
-], ([title, fontSize, fontColor, url]) => {
-  emits('changeHsConfig', { title, fontSize, fontColor, url })
+  () => config.value.borderColor,
+  () => config.value.borderSize,
+  () => config.value.paintType,
+], ([title, fontSize, fontColor, borderSize, paintType]) => {
+  emits('changeHsConfig', { title, fontSize, fontColor, borderSize, paintType })
 })
+
+// 单独监听图形类型的改变
+// watch(()=>config.value.paintType, (paintType)=>{
+
+// })
 
 let editOriginCnf = null
 
@@ -140,8 +188,11 @@ function initConfig() {
   config.value = {
     url: forward,
     title: '默认热点',
-    fontSize: '12px',
-    fontColor: '#FFFFFF'
+    fontSize: '12',
+    fontColor: '#FFFFFF',
+    paintType: 'rect',
+    borderColor: '#FFFFFF',
+    borderSize: 2
   }
 }
 
@@ -156,13 +207,13 @@ function bacthDel() {
 }
 
 /** 暴露出去的方法*/
-const getHsConfig = () => JSON.parse(JSON.stringify(config.value))
-const setHsConfig = (cnf) => { config.value = { ...config.value, ...cnf } }
+const getConfig = () => JSON.parse(JSON.stringify(config.value))
+const setConfig = (cnf) => { config.value = { ...config.value, ...cnf } }
 
 /** 暴露出去的方法*/
 defineExpose({
-  getHsConfig,
-  setHsConfig,
+  getConfig,
+  setConfig,
   editHs
 })
 

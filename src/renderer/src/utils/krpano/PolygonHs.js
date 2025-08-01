@@ -49,7 +49,7 @@ class PolygonHs extends CommonHs{
         const hs = this.krpano.addhotspot(name)
         hs.renderer = 'webgl'
         hs.polyline = true
-        hs.bordercolor = Number(borderColor.replace('#','0x'))
+        hs.bordercolor = borderColor.replace('#','0x')
         hs.borderwidth = borderSize
         hs.cursor  = 'move'
         const firstScreenMouse = {
@@ -58,12 +58,13 @@ class PolygonHs extends CommonHs{
         }
         let lastPoint = { x: -1 , y: -1 }
         const rectPoints = new Array(10).fill(null).map((item,i)=>{
-            if([1,3,5,7].includes(i)) return null
+            if([1,3,5,7].includes(i)) return null   
             return hs.point.createItem(`${name}_point_${i===9?i+1:i}`)
         })
         const { x, y } = this.krpano.screentosphere(firstScreenMouse.x, firstScreenMouse.y)
         rectPoints[0].ath = x
         rectPoints[0].atv = y
+        console.log(hs, rectPoints);
         this.krpano.asyncloop(()=>{
             const kpX = this.krpano.mouse.x
             const kpY = this.krpano.mouse.y
@@ -804,7 +805,7 @@ class PolygonHs extends CommonHs{
                     dragging: true,
                     bgborder:`1.5 0xF81010`,
                     visible: true,
-                    // html:`<div>${i}</div>`
+                    html:`<div>${i}</div>`
                 })
                 ctrlPoint.ath = ath
                 ctrlPoint.atv = atv
@@ -1451,7 +1452,7 @@ class PolygonHs extends CommonHs{
     *  设置图形上方文字标注
     * @param {string} id - 多边形热点id
     * @param {{ title:string, titleFontSize:string }} 
-    * @param {boolean} isPreView - 是否在预览状态下
+    * @param {boolean} customType - 图形类别
     * - 
     * - title 文字标注内容
     * - titleFontSize 文字标注字体大小
