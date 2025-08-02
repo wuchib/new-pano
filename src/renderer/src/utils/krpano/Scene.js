@@ -3,7 +3,7 @@ import config from './config'
 const { EMPTY_SCENE_NAME, PLUGIN_URL, PREFIXX_SCENE } = config()
 
 // 场景类
-class Scene {
+export class Scene {
     krpano
     constructor(kp){ 
         this.krpano = kp

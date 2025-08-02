@@ -1,15 +1,33 @@
 <template>
-  <CommonList :list="graphicsList" title="绘制图形" add-btn-txt="开始绘制" :is-hs-add-edit="isHsAddEdit"
-    :isShowCheckBoxs="isShowCheckBoxs" @goback="goBack" @handleBatchDel="handleBatchDel" @editItem="editHs"
-    @bacthDel="bacthDel" @enterAdd="enterAddHotspot">
+  <CommonList
+    :hsType="'paint'"
+    :list="graphicsList"
+    title="绘制图形"
+    add-btn-txt="开始绘制"
+    :is-hs-add-edit="isAddEdit"
+    :isShowCheckBoxs="isShowCheckBoxs"
+    @goback="goBack"
+    @handleBatchDel="handleBatchDel"
+    @editItem="editHs"
+    @bacthDel="bacthDel"
+    @enterAdd="enterAddHotspot"
+  >
     <template #detail>
       <!-- 选择图标 -->
       <section class="frame">
         <h1 class="sub-title">选择图标</h1>
         <section class="grid grid-cols-3 gap-[4px]">
-          <div class="h-[68px] flex flex-col justify-center items-center rounded-[4px] cursor-pointer "
-            :class="config.paintType === hs.id ? 'bg-[#0099FF]/15 text-[#008AFF]' : 'hover:bg-[#2A2B30] text-[#fff]'"
-            v-for="hs in hsIconOpt" :key="hs.id" @click="checkHsUrl(hs)">
+          <div
+            class="h-[68px] flex flex-col justify-center items-center rounded-[4px] cursor-pointer"
+            :class="
+              config.paintType === hs.id
+                ? 'bg-[#0099FF]/15 text-[#008AFF]'
+                : 'hover:bg-[#2A2B30] text-[#fff]'
+            "
+            v-for="hs in hsIconOpt"
+            :key="hs.id"
+            @click="checkHsUrl(hs)"
+          >
             <i :class="hs.icon"></i>
             <span class="mt-[8px]"> {{ hs.txt }} </span>
           </div>
@@ -23,17 +41,32 @@
         </section>
         <section class="items-center">
           <h1 class="sub-title">字号</h1>
-          <n-select clearable placeholder="请选择字号" v-model:value="config.fontSize" :options="fontSizeOpt" />
+          <n-select
+            clearable
+            placeholder="请选择字号"
+            v-model:value="config.fontSize"
+            :options="fontSizeOpt"
+          />
         </section>
         <section class="items-center">
           <h1 class="sub-title">边框颜色</h1>
-          <n-select :render-label="colorRender" clearable placeholder="请选择边框颜色" v-model:value="config.borderColor"
-            :options="borderColorOpt" />
+          <n-select
+            :render-label="colorRender"
+            clearable
+            placeholder="请选择边框颜色"
+            v-model:value="config.borderColor"
+            :options="borderColorOpt"
+          />
         </section>
         <section class="items-center">
           <h1 class="sub-title">边框粗细</h1>
-          <n-select :render-label="colorRender" clearable placeholder="请选择边框粗细" v-model:value="config.borderSize"
-            :options="borderSizeOpt" />
+          <n-select
+            :render-label="colorRender"
+            clearable
+            placeholder="请选择边框粗细"
+            v-model:value="config.borderSize"
+            :options="borderSizeOpt"
+          />
         </section>
       </section>
       <!-- 保存和删除按钮 -->
@@ -44,7 +77,6 @@
     </template>
   </CommonList>
 </template>
-
 
 <script setup>
 import { ref, defineEmits, defineExpose, watch, h, inject } from 'vue'
@@ -74,23 +106,26 @@ const emits = defineEmits([
 const nDialog = useDialog()
 const message = useMessage()
 
-const isHsAddEdit = inject('isHsAddEdit', false) // 接收上级组件的状态，代表是否正在添加或者编辑热点
+const isAddEdit = inject('isAddEdit', false) // 接收上级组件的状态，代表是否正在添加或者编辑热点
 const isEdit = inject('isEdit', false) // 接收上级组件的状态，代表是否正在编辑热点
 const graphicsList = inject('graphicsList', []) // 接收上级组件的热点列表
 // 热点图标选项
 const hsIconOpt = ref([
-  { id: 'rect', icon: 'i-ri:checkbox-blank-line', txt: '矩形', },
-  { id: 'circle', icon: 'i-ri:edit-circle-line', txt: '椭圆', },
-  { id: 'brush', icon: 'i-ri:mark-pen-line', txt: '画笔', },
-  { id: 'mark', icon: 'i-ri:chat-4-line', txt: '气泡框', },
-  { id: 'line', icon: 'i-ri:subtract-line', txt: '线段', },
-  { id: 'arrow', icon: 'i-ri:arrow-left-up-line', txt: '箭头', },
+  { id: 'rect', icon: 'i-ri:checkbox-blank-line', txt: '矩形' },
+  { id: 'circle', icon: 'i-ri:edit-circle-line', txt: '椭圆' },
+  { id: 'brush', icon: 'i-ri:mark-pen-line', txt: '画笔' },
+  { id: 'mark', icon: 'i-ri:chat-4-line', txt: '气泡框' },
+  { id: 'line', icon: 'i-ri:subtract-line', txt: '线段' },
+  { id: 'arrow', icon: 'i-ri:arrow-left-up-line', txt: '箭头' }
 ])
 
 const isShowCheckBoxs = ref(false)
-watch(() => graphicsList.value, (val) => {
-  if (val.filter(hs => hs.isChecked).length === 0) isShowCheckBoxs.value = false
-})
+watch(
+  () => graphicsList.value,
+  (val) => {
+    if (val.filter((hs) => hs.isChecked).length === 0) isShowCheckBoxs.value = false
+  }
+)
 function handleBatchDel() {
   isShowCheckBoxs.value = !isShowCheckBoxs.value
 }
@@ -101,16 +136,13 @@ async function checkHsUrl(hs) {
     return
   }
 
-  await props.beforeChangePaintType().catch(() => {
-    
-  })
+  await props.beforeChangePaintType().catch(() => {})
 }
 
 function enterAddHotspot() {
   initConfig()
-  isHsAddEdit.value = true
+  isAddEdit.value = true
 }
-
 
 // 图形配置
 const config = ref({
@@ -121,18 +153,17 @@ const config = ref({
   borderSize: 2
 })
 
-
 // 字体大小下拉选项
 const fontSizeOpt = ref([
   { label: '12px', value: '12' },
   { label: '14px', value: '14' },
-  { label: '16px', value: '16' },
+  { label: '16px', value: '16' }
 ])
 // 边框粗细下拉选项
 const borderSizeOpt = ref([
   { label: '2px', value: 2 },
   { label: '4px', value: 4 },
-  { label: '6px', value: 6 },
+  { label: '6px', value: 6 }
 ])
 
 const colorRender = (option) => h('div', { style: { color: option.value } }, option.label)
@@ -145,19 +176,22 @@ const borderColorOpt = ref([
   { label: '草绿色', value: '#6BCB77' },
   { label: '靛蓝蓝', value: '#4D96FF' },
   { label: '紫罗兰', value: '#9D4EDD' },
-  { label: '橙珊瑚', value: '#FF884B' },
+  { label: '橙珊瑚', value: '#FF884B' }
 ])
 
 // 监听配置发生改变
-watch([
-  () => config.value.title,
-  () => config.value.fontSize,
-  () => config.value.borderColor,
-  () => config.value.borderSize,
-  () => config.value.paintType,
-], ([title, fontSize, fontColor, borderSize, paintType]) => {
-  emits('changeHsConfig', { title, fontSize, fontColor, borderSize, paintType })
-})
+watch(
+  [
+    () => config.value.title,
+    () => config.value.fontSize,
+    () => config.value.borderColor,
+    () => config.value.borderSize,
+    () => config.value.paintType
+  ],
+  ([title, fontSize, fontColor, borderSize, paintType]) => {
+    emits('changeHsConfig', { title, fontSize, fontColor, borderSize, paintType })
+  }
+)
 
 // 单独监听图形类型的改变
 // watch(()=>config.value.paintType, (paintType)=>{
@@ -176,6 +210,7 @@ function editHs(hsCnf, autoView = true) {
 // 保存热点
 function save() {
   emits('saveHs')
+  initConfig()
 }
 // 删除热点
 function del() {
@@ -186,7 +221,6 @@ function del() {
 // 初始化数据
 function initConfig() {
   config.value = {
-    url: forward,
     title: '默认热点',
     fontSize: '12',
     fontColor: '#FFFFFF',
@@ -208,7 +242,9 @@ function bacthDel() {
 
 /** 暴露出去的方法*/
 const getConfig = () => JSON.parse(JSON.stringify(config.value))
-const setConfig = (cnf) => { config.value = { ...config.value, ...cnf } }
+const setConfig = (cnf) => {
+  config.value = { ...config.value, ...cnf }
+}
 
 /** 暴露出去的方法*/
 defineExpose({

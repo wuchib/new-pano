@@ -1,5 +1,5 @@
 // 事件
-class Event{
+export class Event{
     krpano
     constructor(kp){ this.krpano = kp }
 

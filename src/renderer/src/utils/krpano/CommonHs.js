@@ -8,7 +8,7 @@ const {
 
 
 // 热点类
-class CommonHs{
+export class CommonHs{
     krpano
     hsDragCb
     constructor(kp,cb){ 

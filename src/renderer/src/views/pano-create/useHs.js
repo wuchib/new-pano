@@ -1,17 +1,20 @@
 import { useMessage, useDialog } from 'naive-ui'
 import { v4 as uuidv4 } from 'uuid';
 import { ref } from 'vue'
+import { initPanorama, Scene, View, CommonHs, PolygonHs, Event } from '@renderer/utils/krpano/index.js'
 
 function useHs({
     HotspotBoardRef,
     isEdit,
-    isHsAddEdit,
+    isAddEdit,
     curEntity,
     curEntityId
 }) {
     const nDialog = useDialog()
     const message = useMessage()
+    /**@type { CommonHs } */
     let commonHsInstance = null
+    /**@type { View } */
     let viewInstance = null
     const editOriginCnf = ref(null)
     // 保存的热点列表
@@ -24,7 +27,7 @@ function useHs({
 
     // 添加热点
     function addHotspot() {
-        if (isHsAddEdit.value && curEntity.value === null) {
+        if (isAddEdit.value && curEntity.value === null) {
             curEntityId.value = uuidv4()
             const { title: txt, url } = HotspotBoardRef.value.getHsConfig()
             console.log({ id: curEntityId.value, url, txt });
@@ -61,7 +64,7 @@ function useHs({
             }, false)
         }
         clearCurEntityMeta()
-        isHsAddEdit.value = false
+        isAddEdit.value = false
         isEdit.value = false
     }
 
@@ -79,7 +82,7 @@ function useHs({
         const targetIndex = hsList.value.findIndex(hs => hs.id === curEntityId.value)
         if (targetIndex !== -1) hsList.value.splice(targetIndex, 1)
         clearCurEntityMeta()
-        isHsAddEdit.value = false
+        isAddEdit.value = false
         isEdit.value = false
     }
 
@@ -89,14 +92,14 @@ function useHs({
         if (autoView) {
             viewInstance.lookToPosition(hsConfig.ath, hsConfig.atv, null, () => {
                 commonHsInstance.setEditRect(hsConfig.id, true)
-                isHsAddEdit.value = true
+                isAddEdit.value = true
                 isEdit.value = true
                 curEntity.value = commonHsInstance.getEntity('', hsConfig.id)
                 curEntityId.value = hsConfig.id
             })
         } else {
             commonHsInstance.setEditRect(hsConfig.id, true)
-            isHsAddEdit.value = true
+            isAddEdit.value = true
             isEdit.value = true
             curEntity.value = commonHsInstance.getEntity('', hsConfig.id)
             curEntityId.value = hsConfig.id
@@ -111,7 +114,7 @@ function useHs({
         curEntity.value._hs.url = url
         commonHsInstance.addTip(curEntity.value._hs.name, title, { 'font-size': fontSize, 'color': fontColor })
         clearCurEntityMeta()
-        isHsAddEdit.value = false
+        isAddEdit.value = false
         isEdit.value = false
     }
 

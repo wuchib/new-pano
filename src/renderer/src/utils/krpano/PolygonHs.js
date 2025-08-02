@@ -8,7 +8,7 @@ const {
 } = config()
 
 // 多边形热点
-class PolygonHs extends CommonHs{
+export class PolygonHs extends CommonHs{
     isMouseDown = false
     isForbit = false
     constructor(kp, hsDragCb, updateMarkWhCb, updateTipPositionCb, updateCtrlPointsCb){ 

@@ -1,5 +1,5 @@
 // 视图类
-class View{
+export class View{
     krpano
     constructor(kp){ this.krpano = kp }
 
