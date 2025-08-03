@@ -2,6 +2,7 @@ import { useMessage, useDialog } from 'naive-ui'
 import { v4 as uuidv4 } from 'uuid';
 import { ref } from 'vue'
 import { initPanorama, Scene, View, CommonHs, PolygonHs, Event } from '@renderer/utils/krpano/index.js'
+import { cloneDeep } from 'lodash';
 function useGraphics({
     paintBoardRef,
     isEdit,
@@ -11,7 +12,6 @@ function useGraphics({
 }) {
     const nDialog = useDialog()
     const message = useMessage()
-
 
     /**@type {PolygonHs} */
     let polygonHsInstance = null // 图形工具实例
@@ -42,7 +42,7 @@ function useGraphics({
         const config = paintBoardRef.value.getConfig()
         if (isEdit.value) { // 编辑的时候保存-改变配置
             const target = graphicsList.value.find(item => item.id === curEntityId.value)
-            if(!target) return
+            if (!target) return
             for (const key in config) {
                 target[key] = config[key]
             }
@@ -52,6 +52,9 @@ function useGraphics({
                 id: curEntityId.value,
             }
             graphicsList.value.push(newGraphics)
+            polygonHsInstance.setPolygonClickEvent(curEntityId.value, () => {
+                paintBoardRef.value.editHs(newGraphics, false)
+            })
         }
         curEntity.value._hs.dragging = false
         polygonHsInstance.hideAllCtrlPoints()
@@ -67,17 +70,18 @@ function useGraphics({
             message.warning('暂无图形')
             return
         }
-        if(isEdit.value){
+        if (isEdit.value) {
             const targetIndex = graphicsList.value.findIndex(item => item.id === curEntityId.value)
-            if(targetIndex !== -1) graphicsList.value.splice(targetIndex, 1)
+            if (targetIndex !== -1) graphicsList.value.splice(targetIndex, 1)
         }
         const { paintType } = paintBoardRef.value.getConfig() // 获取配置
         commonHsInstance.delEntity(paintType, curEntityId.value) // 删除操作
         polygonHsInstance.hideAllCtrlPoints()
         curEntity.value = null
         curEntityId.value = null
-        // isAddEdit.value = false
-        // isEdit.value = false
+        viewInstance.userControl('all')
+        isAddEdit.value = false
+        isEdit.value = false
     }
     /**编辑图形 */
     function editGraphics(hsCnf, autoView) {
@@ -87,7 +91,7 @@ function useGraphics({
         curEntity.value = polygonHsInstance.getEntity(paintType, id)
         curEntity.value._hs.dragging = true
         // 2. 跳转到图形位置并恢复控制点
-        viewInstance.lookToHs(curEntity.value._hs.name)
+        if(autoView) viewInstance.lookToHs(curEntity.value._hs.name)
         polygonHsInstance.drawControlPoints(curEntityId.value, paintType)
         // 3. 锁住镜头
         viewInstance.userControl('off')
@@ -95,8 +99,29 @@ function useGraphics({
         isAddEdit.value = true
         isEdit.value = true
         paintBoardRef.value.setConfig(hsCnf)
+        // 5. 记录原数据配置
+        editOriginGraphicsCnf.value = cloneDeep(hsCnf)
     }
-    function restoreGraphics() { }
+    /**编辑时不保存进行的数据恢复 */
+    function restoreGraphics(oldHsConfig) {
+        const { _hs, _tip } = curEntity.value
+        const curPoints = _hs.point.getArray()
+        curPoints.forEach(p => {
+            const target = oldHsConfig.points.find(op => op.name === p.name)
+            if (target) {
+                p.ath = target.ath
+                p.atv = target.atv
+            }
+        });
+        _tip.ath = oldHsConfig.tipPosition.ath
+        _tip.atv = oldHsConfig.tipPosition.atv
+        _hs.meta.ctrlPoints = cloneDeep(oldHsConfig.ctrlPoints)
+        _hs.dragging = false
+        polygonHsInstance.drawControlPoints(curEntityId.value, oldHsConfig.paintType)
+        polygonHsInstance.hideAllCtrlPoints()
+        curEntity.value = null
+        curEntityId.value = null
+    }
     function bacthDelGraphics() { }
     function addGraphics() {
         // 把镜头锁住
@@ -129,8 +154,32 @@ function useGraphics({
         viewInstance = _viewInstance
         commonHsInstance = _commonHsInstance
     }
-    function graphicsDragCb() {
 
+    // 图形拖拽时的回调(更新位置)
+    function graphicsDragCb(points) {
+        paintBoardRef.value.setConfig({ points })
+    }
+    // 图形拖拽时的回调(更新标签位置)
+    function graphicsDragUpdateTipCb(ath, atv) {
+        paintBoardRef.value.setConfig({
+            tipPosition: { ath, atv }
+        })
+    }
+
+    // 图形控制点更新时的回调
+    function updateCtrlPointsCb(ctrlPoints) {
+        paintBoardRef.value.setConfig({ ctrlPoints })
+    }
+
+    // 切换工具之前
+    function beforeChangePaintType(){
+        return new Promise((resolve, reject)=>{
+            if(curEntity.value === null){
+                resolve()
+            } else{
+                reject()
+            }
+        })
     }
 
     return {
@@ -145,6 +194,9 @@ function useGraphics({
         addGraphics,
         setInstance,
         graphicsDragCb,
+        graphicsDragUpdateTipCb,
+        updateCtrlPointsCb,
+        beforeChangePaintType
     }
 }
 

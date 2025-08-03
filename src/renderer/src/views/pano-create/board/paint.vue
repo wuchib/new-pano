@@ -113,8 +113,8 @@ const graphicsList = inject('graphicsList', []) // 接收上级组件的热点�
 const hsIconOpt = ref([
   { id: 'rect', icon: 'i-ri:checkbox-blank-line', txt: '矩形' },
   { id: 'circle', icon: 'i-ri:edit-circle-line', txt: '椭圆' },
-  { id: 'brush', icon: 'i-ri:mark-pen-line', txt: '画笔' },
-  { id: 'mark', icon: 'i-ri:chat-4-line', txt: '气泡框' },
+  // { id: 'brush', icon: 'i-ri:mark-pen-line', txt: '画笔' },
+  // { id: 'mark', icon: 'i-ri:chat-4-line', txt: '气泡框' },
   { id: 'line', icon: 'i-ri:subtract-line', txt: '线段' },
   { id: 'arrow', icon: 'i-ri:arrow-left-up-line', txt: '箭头' }
 ])
@@ -130,13 +130,16 @@ function handleBatchDel() {
   isShowCheckBoxs.value = !isShowCheckBoxs.value
 }
 
-async function checkHsUrl(hs) {
+function checkHsUrl(hs) {
   if (props.beforeChangePaintType === null) {
     config.value.paintType = hs.id
     return
   }
-
-  await props.beforeChangePaintType().catch(() => {})
+  props.beforeChangePaintType().then(()=>{
+    config.value.paintType = hs.id
+  }).catch(()=>{
+    message.warning('图形未保存时请勿切换工具')
+  })
 }
 
 function enterAddHotspot() {
@@ -150,7 +153,16 @@ const config = ref({
   fontSize: '12',
   paintType: 'rect',
   borderColor: '#FFFFFF',
-  borderSize: 2
+  borderSize: 2,
+  // 组成图形的关键点位置信息
+  points: [],
+  // 控制点位置信息
+  ctrlPoints: [],
+  // 标签位置信息
+  tipPosition: {
+    ath: 0,
+    atv: 0
+  }
 })
 
 // 字体大小下拉选项
@@ -193,10 +205,6 @@ watch(
   }
 )
 
-// 单独监听图形类型的改变
-// watch(()=>config.value.paintType, (paintType)=>{
-
-// })
 
 let editOriginCnf = null
 
@@ -226,7 +234,16 @@ function initConfig() {
     fontColor: '#FFFFFF',
     paintType: 'rect',
     borderColor: '#FFFFFF',
-    borderSize: 2
+    borderSize: 2,
+    // 组成图形的关键点位置信息
+    points: [],
+    // 控制点位置信息
+    ctrlPoints: [],
+    // 标签位置信息
+    tipPosition: {
+      ath: 0,
+      atv: 0
+    }
   }
 }
 
@@ -252,7 +269,6 @@ defineExpose({
   setConfig,
   editHs
 })
-
 </script>
 
 <style scoped lang="less"></style>

@@ -64,6 +64,8 @@
         <PaintBoard
           ref="paintBoardRef"
           v-if="curFunc === 'mark'"
+
+          :beforeChangePaintType="beforeChangePaintType"
           @changeHsConfig="changeGraphicsConfig"
           @saveHs="saveGraphics"
           @delHs="delGraphics"
@@ -81,10 +83,17 @@
 <script setup>
 import { onMounted, provide, ref } from 'vue'
 import useFooterToggle from './useFooterToggle'
-import { Scene, initPanorama, View, CommonHs, PolygonHs, Event } from '@renderer/utils/krpano/index.js'
+import {
+  Scene,
+  initPanorama,
+  View,
+  CommonHs,
+  PolygonHs,
+  Event
+} from '@renderer/utils/krpano/index.js'
 import { v4 as uuidv4 } from 'uuid'
 import { useMessage, useDialog } from 'naive-ui'
-import { isEqual, cloneDeep } from 'lodash'
+import { isEqual, cloneDeep, has } from 'lodash'
 import HotspotBoard from './board/hotspot.vue'
 import PaintBoard from './board/paint.vue'
 import useHs from './useHs'
@@ -153,7 +162,10 @@ const {
   bacthDelGraphics,
   addGraphics,
   setInstance: setInsGra,
-  graphicsDragCb
+  graphicsDragCb,
+  graphicsDragUpdateTipCb,
+  updateCtrlPointsCb,
+  beforeChangePaintType
 } = useGraphics({
   paintBoardRef,
   isEdit,
@@ -176,16 +188,16 @@ onMounted(async () => {
     if (curFunc.value === 'hotspot') addHotspot()
   })
   eventInstance.registerEvent('ondown', () => {
-    if(curFunc.value !== 'mark') return
-    if(!isAddEdit.value) return // 如果没进入开始绘制状态，则不进行
-    if(curEntity.value !== null) return // 如果已有绘制对象没保存，则不进行
+    if (curFunc.value !== 'mark') return
+    if (!isAddEdit.value) return // 如果没进入开始绘制状态，则不进行
+    if (curEntity.value !== null) return // 如果已有绘制对象没保存，则不进行
     polygonHsInstance.setIsDown(true)
     polygonHsInstance.setIsForbit(false)
     addGraphics()
   })
   eventInstance.registerEvent('onup', () => {
-    if(curFunc.value !== 'mark') return
-    if(!isAddEdit.value) return // 如果没进入开始绘制状态，则不进行
+    if (curFunc.value !== 'mark') return
+    if (!isAddEdit.value) return // 如果没进入开始绘制状态，则不进行
     polygonHsInstance.setIsDown(false)
     polygonHsInstance.setIsForbit(true)
     const { title, fontSize, fontColor, borderSize, paintType } = paintBoardRef.value.getConfig()
@@ -195,16 +207,40 @@ onMounted(async () => {
       { title, titleFontSize: fontSize },
       paintType
     )
+    // 绘制完毕后更新控制点位置信息和标签位置信息
+    paintBoardRef.value.setConfig({
+      ctrlPoints: curEntity.value._hs.meta.ctrlPoints,
+      tipPosition: curEntity.value._hs.meta.tipPosition,
+      points: curEntity.value._hs.point.getArray()
+    })
   })
 })
+
+function dragCb(ath, atv, points) {
+  const hash = {
+    hotspot: () => {
+      hsDragCb(ath, atv)
+    },
+    mark: () => {
+      graphicsDragCb(points)
+    }
+  }
+  return hash[curFunc.value]
+}
 
 // 初始化krpano工具实例
 async function initKrpanoInstance() {
   krpano = await initPanorama(panoViewerRef.value)
   sceneInstance = new Scene(krpano)
   viewInstance = new View(krpano)
-  commonHsInstance = new CommonHs(krpano, hsDragCb)
-  polygonHsInstance = new PolygonHs(krpano)
+  commonHsInstance = new CommonHs(krpano, dragCb)
+  polygonHsInstance = new PolygonHs(
+    krpano,
+    dragCb,
+    () => {},
+    graphicsDragUpdateTipCb,
+    updateCtrlPointsCb
+  )
   eventInstance = new Event(krpano)
   setInsHs({
     _commonHsInstance: commonHsInstance,
@@ -213,7 +249,7 @@ async function initKrpanoInstance() {
   setInsGra({
     _polygonHsInstance: polygonHsInstance,
     _viewInstance: viewInstance,
-    _commonHsInstance: commonHsInstance,
+    _commonHsInstance: commonHsInstance
   })
 }
 
@@ -233,6 +269,9 @@ function goBack(cb = () => {}) {
   }
   // 是新增或编辑状态
   const exitAddEdit = () => {
+    viewInstance.userControl('all')
+    polygonHsInstance.setIsForbit(true)
+    commonHsInstance.hideEditRectTip()
     isAddEdit.value = false
     isEdit.value = false
     cb()
@@ -241,20 +280,36 @@ function goBack(cb = () => {}) {
     isAddEdit.value = false
     cb()
   }
+  const getNewConfig = () => {
+    const hash = {
+      mark: () => paintBoardRef.value.getConfig(),
+      hotspot: () => HotspotBoardRef.value.getHsConfig()
+    }
+    return hash[curFunc.value]()
+  }
+
+  const getOldConfig = () => {
+    const hash = {
+      mark: editOriginGraphicsCnf.value,
+      hotspot: editOriginCnf.value
+    }
+    return hash[curFunc.value]
+  }
   if (isEdit.value) {
     // 编辑状态
-    const newHsConfig = HotspotBoardRef.value.getHsConfig()
-    if (isEqual(editOriginCnf.value, newHsConfig)) {
+    const newHsConfig = getNewConfig()
+    const oldHsConfig = getOldConfig()
+    if (isEqual(oldHsConfig, newHsConfig)) {
       exitAddEdit()
       return
     }
     nDialogForBack()
       .then(() => save())
-      .catch(() => restore(editOriginCnf.value))
+      .catch(() => restore(oldHsConfig))
       .finally(exitAddEdit)
   } else {
     // 新增状态
-    if (curEntity === null) {
+    if (curEntity.value === null) {
       exitAddOnly()
     } else {
       nDialogForBack()
@@ -266,13 +321,13 @@ function goBack(cb = () => {}) {
 }
 
 // 数据恢复
-function restore() {
+function restore(oldHsConfig) {
   const hash = {
-    hotspot: (editOriginCnf) => {
-      restoreHs(editOriginCnf)
+    hotspot: () => {
+      restoreHs(oldHsConfig)
     },
-    mark: (editOriginCnf) => {
-      restoreGraphics(editOriginCnf)
+    mark: () => {
+      restoreGraphics(oldHsConfig)
     }
   }
   hash[curFunc.value]()

@@ -27,8 +27,13 @@
         <!-- 热点列表 -->
         <section
           class="mt-[16px] rounded-[6px] pb-[42px] flex-1 position-relative overflow-hidden border-[#35363B] border-[1px] border-solid"
+          :class="list.length === 0 ? 'flex justify-center items-center' : ''"
         >
-          <ul class="w-full h-full p-[8px] overflow-auto">
+          <div class="flex flex-col items-center">
+            <i class="i-ri:inbox-2-line font-size-[52px] text-[#313135]"></i>
+            <span class="text-[#313135] font-600">暂无数据</span>
+          </div>
+          <ul v-if="list.length > 0" class="w-full h-full p-[8px] overflow-auto">
             <li
               v-for="hs in list"
               :key="hs.id"
