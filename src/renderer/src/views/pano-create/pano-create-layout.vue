@@ -7,23 +7,7 @@
         class="w-full h-full position-absolute left-0 top-0 z-0"
       ></section>
       <!-- 分组列表 -->
-      <footer
-        class="bg-[#0D0E0E]/89 gruoup-list-wrap position-absolute bottom-0 left-0 right-0 h-[56px]"
-      >
-        <!-- 滑块 -->
-        <div
-          class="position-absolute bottom-[100%] right-4 w-[44px] h-[32px] flex justify-center items-center bg-[#2A2B30] cursor-pointer"
-          :style="{ ...slideBtnStyle, ...transition }"
-          @click="togglePhotoList"
-        >
-          <i class="i-ri:arrow-down-double-fill color-[#fff]" :style="slideIconStyle"></i>
-        </div>
-        <!-- 图片列表容器 -->
-        <section
-          class="bg-[#0D0E0E]/89 photo-list-wrap left-0 right-0 h-[142px] position-absolute bottom-[100%] transform-translate-y-[0]"
-          :style="{ ...slideMainStyle, ...transition }"
-        ></section>
-      </footer>
+      <panoNavbar />
     </main>
     <!-- 侧边编辑容器 -->
     <aside class="h-full w-[380px] bg-[#1f2024] flex">
@@ -82,7 +66,7 @@
 
 <script setup>
 import { onMounted, provide, ref } from 'vue'
-import useFooterToggle from './useFooterToggle'
+import panoNavbar from './pano-navbar.vue'
 import {
   Scene,
   initPanorama,
@@ -103,7 +87,6 @@ const message = useMessage()
 const isAddEdit = ref(false) // 是否进入添加/编辑热点页面
 const isEdit = ref(false) // 是否在编辑热点
 
-const { isShowP, slideMainStyle, slideBtnStyle, slideIconStyle, transition } = useFooterToggle()
 const panoViewerRef = ref(null)
 const nDialog = useDialog()
 /** 一些实例 */
@@ -173,10 +156,6 @@ const {
   curEntity,
   curEntityId
 })
-
-function togglePhotoList() {
-  isShowP.value = !isShowP.value
-}
 
 onMounted(async () => {
   await initKrpanoInstance()

@@ -1,30 +1,76 @@
 <template>
-    <section class="bg-[#0D0E0E]/89 gruoup-list-wrap position-absolute bottom-0 left-0 right-0 h-[56px]">
-        <!-- 滑块 -->
-        <div class="position-absolute bottom-[100%] right-4 w-[44px] h-[32px] flex justify-center items-center bg-[#2A2B30] cursor-pointer"
-            :style="{ ...slideBtnStyle, ...transition }" @click="togglePhotoList">
-            <i class="i-ri:arrow-down-double-fill color-[#fff]" :style="slideIconStyle"></i>
-        </div>
-        <!-- 图片列表容器 -->
-        <section
-            class="bg-[#0D0E0E]/89 photo-list-wrap left-0 right-0 h-[142px] position-absolute bottom-[100%] transform-translate-y-[0]"
-            :style="{ ...slideMainStyle, ...transition }">
-        </section>
+  <section
+    class="bg-[#0D0E0E]/89 gruoup-list-wrap position-absolute bottom-0 left-0 right-0 h-[56px] flex items-center px-[8px]"
+  >
+    <!-- 滑块 -->
+    <div
+      class="position-absolute bottom-[100%] right-4 w-[44px] h-[32px] flex justify-center items-center bg-[#2A2B30] cursor-pointer"
+      :style="{ ...slideBtnStyle, ...transition }"
+      @click="togglePhotoList"
+    >
+      <i class="i-ri:arrow-down-double-fill color-[#fff]" :style="slideIconStyle"></i>
+    </div>
+    <!-- 图片列表容器 -->
+    <section
+      class="w-full bg-[#0D0E0E]/89 photo-list-wrap left-0 right-0 h-[142px] position-absolute bottom-[100%] transform-translate-y-[0] px-[8px] flex items-center"
+      :style="{ ...slideMainStyle, ...transition }"
+    >
+      <ul class="overflow-auto position-relative whitespace-nowrap">
+        <li class="navbar-scene-item p-[2px]">
+          <div
+            class="w-full h-full flex flex-col justify-center items-center rounded-[4px] text-[#fff]/65 border-[#404147] bg-[#24262a] border-dashed border-[1px] gap-[12px] text-[#fff]/65 cursor-pointer hover:opacity-[0.8]"
+          >
+            <i class="i-ri:add-line text-[16px]"></i>
+            <span class="">添加全景照片</span>
+          </div>
+        </li>
+        <li
+          class="navbar-scene-item ml-[8px] rounded-[4px] overflow-hidden cursor-pointer p-[2px]"
+          :class="
+            curSceneId === scene.id
+              ? 'border-[#0099FF] border-[2px] border-solid'
+              : 'hover:border-[#0099FF] border-[2px] border-solid'
+          "
+          v-for="scene in curGroupData.sceneList"
+          :key="scene.id"
+          @click="curSceneId = scene.id"
+        >
+          <img class="w-full h-full rounded-[4px]" src="../../assets/cover.png" alt="" />
+        </li>
+      </ul>
     </section>
+
+    <!-- 分组列表 -->
+    <ul class="overflow-auto position-relative z-1 whitespace-nowrap">
+      <li class="navbar-group-item bg-[#2A2B30] hover:opacity-[0.8]">
+        <i class="i-ri:add-line"></i>
+        <span class="text-[14px]">新增场景</span>
+      </li>
+
+      <li
+        class="navbar-group-item ml-[4px]"
+        v-for="group in groups"
+        :class="curGroupId === group.id ? 'bg-[#0099FF]' : 'hover:bg-[#2A2B30]'"
+        :key="group.id"
+        @click="curGroupId = group.id"
+      >
+        {{ group.name }}
+      </li>
+    </ul>
+  </section>
 </template>
 
-
 <script setup>
+import { ref } from 'vue'
 import useFooterToggle from './useFooterToggle'
+import usePanoGroup from './usePanoGroup'
 
-const {
-  isShowP,
-  slideMainStyle,
-  slideBtnStyle,
-  slideIconStyle,
-  transition
-} = useFooterToggle()
+const { isShowP, slideMainStyle, slideBtnStyle, slideIconStyle, transition } = useFooterToggle()
+const { groups, curGroupId, curSceneId, curGroupData, curSceneData } = usePanoGroup()
+
+function togglePhotoList() {
+  isShowP.value = !isShowP.value
+}
 </script>
-
 
 <style></style>
