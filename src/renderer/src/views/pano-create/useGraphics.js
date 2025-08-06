@@ -91,7 +91,7 @@ function useGraphics({
         curEntity.value = polygonHsInstance.getEntity(paintType, id)
         curEntity.value._hs.dragging = true
         // 2. 跳转到图形位置并恢复控制点
-        if(autoView) viewInstance.lookToHs(curEntity.value._hs.name)
+        if (autoView) viewInstance.lookToHs(curEntity.value._hs.name)
         polygonHsInstance.drawControlPoints(curEntityId.value, paintType)
         // 3. 锁住镜头
         viewInstance.userControl('off')
@@ -122,7 +122,37 @@ function useGraphics({
         curEntity.value = null
         curEntityId.value = null
     }
-    function bacthDelGraphics() { }
+    // 批量删除
+    function bacthDelGraphics() {
+        const remainHsData = []
+        if (graphicsList.value.filter(hs => hs.isChecked === true).length === 0) {
+            message.warning('请选择删除的图形')
+            return
+        }
+        nDialog.warning({
+            title: '提示',
+            content: '是否删除选中图形',
+            positiveText: '确认删除',
+            negativeText: '取消',
+            maskClosable: false,
+            closeOnEsc: false,
+            // 确认删除
+            onPositiveClick: () => {
+                graphicsList.value.forEach(hs => {
+                    if (hs.isChecked === true) {
+                        commonHsInstance.delEntity(hs.paintType, hs.id)
+                    } else {
+                        remainHsData.push(hs)
+                    }
+                })
+                graphicsList.value = JSON.parse(JSON.stringify(remainHsData))
+            },
+            // 取消
+            onNegativeClick: () => {
+                graphicsList.value.forEach(hs => { hs.isChecked = false })
+            }
+        })
+    }
     function addGraphics() {
         // 把镜头锁住
         viewInstance.userControl('off')
@@ -172,11 +202,11 @@ function useGraphics({
     }
 
     // 切换工具之前
-    function beforeChangePaintType(){
-        return new Promise((resolve, reject)=>{
-            if(curEntity.value === null){
+    function beforeChangePaintType() {
+        return new Promise((resolve, reject) => {
+            if (curEntity.value === null) {
                 resolve()
-            } else{
+            } else {
                 reject()
             }
         })

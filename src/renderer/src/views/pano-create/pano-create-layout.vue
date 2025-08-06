@@ -250,6 +250,7 @@ function goBack(cb = () => {}) {
   const exitAddEdit = () => {
     viewInstance.userControl('all')
     polygonHsInstance.setIsForbit(true)
+    polygonHsInstance.hideAllCtrlPoints()
     commonHsInstance.hideEditRectTip()
     isAddEdit.value = false
     isEdit.value = false

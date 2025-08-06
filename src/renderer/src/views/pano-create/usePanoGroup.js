@@ -6,6 +6,11 @@ function usePanoGroup() {
     const curGroupId = ref('group_1') // 当前选中的分组id
     const curSceneId = ref('scene_1_1') // 当前选中的场景id
 
+    const sceneHandleOpt = ref([
+        { key: 'copy', label: '复制' },
+        { key: 'del', label: '删除' },
+    ])
+
     // 当前选中的分组数据对象
     const curGroupData = computed(() => {
         const target = groups.value.find(g => g.id === curGroupId.value)
@@ -24,7 +29,8 @@ function usePanoGroup() {
         curGroupId,
         curSceneId,
         curGroupData,
-        curSceneData
+        curSceneData,
+        sceneHandleOpt
     }
 }
 
