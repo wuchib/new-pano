@@ -2,35 +2,9 @@ import { app, shell, BrowserWindow, ipcMain } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
-// import { AppDataSource } from './database/index.js'
-import { DataSource, EntitySchema } from 'typeorm'
-// import { CategoryEntity } from './database/entities/scene.js'
-
-class Category {
-    constructor(id, name) {
-        this.id = id;
-        this.name = name;
-    }
-}
-
-const CategoryEntity = new EntitySchema({
-    name: "Category",
-    target: Category,
-    columns: {
-        id: {
-            primary: true,
-            type: "int",
-            generated: true
-        },
-        name: {
-            type: "varchar"
-        }
-    }
-})
-
-const getUserQueryBuilder = async (AppDataSource) => {
-  return AppDataSource.getRepository(CategoryEntity).createQueryBuilder('scene');
-};
+import { AppDataSource } from './database/index'
+import Scene from "./database/model/scene";
+import registerIpc from './ipc/index' 
 
 function createWindow() {
   // Create the browser window.
@@ -69,38 +43,13 @@ function createWindow() {
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(async () => {
   // Set app user model id for windows
-  // if (!AppDataSource.isInitialized) {
-  //   const [err, _res] = await to(AppDataSource.initialize())
-  //   if (err) {
-  //     throw err
-  //   }
-  // }
-  const database = 'database.sqlite';
-  console.log(database,'🤣🤣🤣');
-  
-  const db = new DataSource({
-    type: "better-sqlite3", // 设定链接的数据库类型
-    database:'./database.sqlite', // 数据库存放地址
-    synchronize: true, // 确保每次运行应用程序时实体都将与数据库同步
-    logging: ['error','warn'], // 日志，默认在控制台中打印，数组列举错误类型枚举
-    entities: [CategoryEntity], // 实体或模型表
-  })
 
-  db.initialize()
-
-  const c = new Category(0, "TypeScript")
-  console.log(c, 'xxxxxxxxxxx')
-  // db.getRepository(CategoryEntity).insert()
-
-
-  // getUserQueryBuilder(AS).then(res=>{
-  //   return res.insert().values(new CategoryEntity({ name:'测试',url:'21312' })).execute();
-  // }).then(()=>{
-  //   getUserQueryBuilder(AS).then(res=>{
-  //     return res.findOneBy({ name:'测试' });
-  //   })
-  // })
-
+  //===== 测试一下数据库连接以及插入数据 start
+  const dbIns = await AppDataSource.initialize()
+  const repository =  dbIns.getRepository('Scene')
+  const scene1 = new Scene(null,"cbiu","12345")
+  repository.insert(scene1)
+  //===== 测试一下数据库连接以及插入数据 end
 
   electronApp.setAppUserModelId('com.electron')
 
@@ -118,6 +67,8 @@ app.whenReady().then(async () => {
     mainWin.webContents.send('dblclick-from-overlay') // 你可以进一步发给主窗口 UI 层
   })
 
+  // 注册ipc,构建通信
+  registerIpc()
   createWindow()
 
   app.on('activate', function () {

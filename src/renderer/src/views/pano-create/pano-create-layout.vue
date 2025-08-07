@@ -2,12 +2,19 @@
   <div class="w-full h-full flex">
     <!-- 全景容器 -->
     <main class="position-relative h-full flex-1 bg-[#1a1a1e]">
+      <n-button
+        :color="'#313135'"
+        strong
+        class="text-[#fff]/85 position-absolute z-1 cursor-pointer right-10px top-10px"
+        @click="saveTest"
+        >保存</n-button
+      >
       <section
         ref="panoViewerRef"
         class="w-full h-full position-absolute left-0 top-0 z-0"
       ></section>
       <!-- 分组列表 -->
-      <panoNavbar />
+      <panoNavbar />save
     </main>
     <!-- 侧边编辑容器 -->
     <aside class="h-full w-[380px] bg-[#1f2024] flex">
@@ -48,7 +55,6 @@
         <PaintBoard
           ref="paintBoardRef"
           v-if="curFunc === 'mark'"
-
           :beforeChangePaintType="beforeChangePaintType"
           @changeHsConfig="changeGraphicsConfig"
           @saveHs="saveGraphics"
@@ -359,6 +365,16 @@ function nDialogForBack() {
       }
     })
   })
+}
+
+// 保存
+async function saveTest() {
+  const res = await window.customApi.saveScene({
+    base:{
+      id: uuidv4()
+    }
+  })
+  console.log(res);
 }
 
 provide('isAddEdit', isAddEdit)
