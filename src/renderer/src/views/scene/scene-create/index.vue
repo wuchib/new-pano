@@ -6,7 +6,7 @@
 
 
 <script setup>
-import PanoCreateLayout from './pano-create-layout.vue'
+import PanoCreateLayout from './scene-create-layout.vue'
 </script>
 
 <style scoped lang="less">

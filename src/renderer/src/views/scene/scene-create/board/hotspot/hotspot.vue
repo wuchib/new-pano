@@ -93,7 +93,7 @@ import point from '@renderer/assets/img/hs/point.png';
 import turnLeft from '@renderer/assets/img/hs/turn-left.png';
 import turnRight from '@renderer/assets/img/hs/turn-right.png';
 import { useMessage, useDialog } from 'naive-ui';
-import CommonList from '../common-list.vue';
+import CommonList from '../../common/common-list.vue';
 const emits = defineEmits([
   'changeHsConfig',
   'saveHs',

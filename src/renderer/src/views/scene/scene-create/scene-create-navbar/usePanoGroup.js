@@ -1,5 +1,5 @@
 import { computed, ref } from 'vue'
-import { initGroups } from './mock'
+import { initGroups } from '../common/mock'
 
 function usePanoGroup() {
     const groups = ref(initGroups) // 分组列表

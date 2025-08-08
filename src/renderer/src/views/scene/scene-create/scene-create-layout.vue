@@ -72,7 +72,7 @@
 
 <script setup>
 import { onMounted, provide, ref } from 'vue'
-import panoNavbar from './pano-navbar.vue'
+import panoNavbar from './scene-create-navbar/scene-create-navbar.vue'
 import {
   Scene,
   initPanorama,
@@ -84,10 +84,10 @@ import {
 import { v4 as uuidv4 } from 'uuid'
 import { useMessage, useDialog } from 'naive-ui'
 import { isEqual, cloneDeep, has } from 'lodash'
-import HotspotBoard from './board/hotspot.vue'
-import PaintBoard from './board/paint.vue'
-import useHs from './useHs'
-import useGraphics from './useGraphics'
+import HotspotBoard from './board/hotspot/hotspot.vue'
+import PaintBoard from './board/graphics/paint.vue'
+import useHs from './board/hotspot/useHs'
+import useGraphics from './board/graphics/useGraphics'
 
 const message = useMessage()
 const isAddEdit = ref(false) // 是否进入添加/编辑热点页面
@@ -166,7 +166,7 @@ const {
 onMounted(async () => {
   await initKrpanoInstance()
   const sceneId = uuidv4()
-  const imgUrl = new URL(`../../assets/img/panoPhoto.jpg`, import.meta.url).href
+  const imgUrl = new URL(`../../../assets/img/panoPhoto.jpg`, import.meta.url).href
   sceneInstance.addSceneInKp({ sceneId, imgUrl })
   await sceneInstance.loadSceneAsync(sceneId)
   eventInstance.registerEvent('onclick', () => {
