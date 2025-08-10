@@ -1,14 +1,7 @@
 <template>
   <div class="w-full h-full flex flex-col">
     <!-- 功能标题 -->
-    <header
-      class="h-[50px] w-full border-b-[#35363B] border-[1px] border-solid flex items-center pl-[8px]"
-    >
-      <h1 class="text-[14px] color-[#fff] font-400">
-        <span v-if="!isHsAddEdit">{{ title }}</span>
-        <i v-else class="i-ri:arrow-go-back-fill cursor-pointer" @click="$emit('goback')"></i>
-      </h1>
-    </header>
+    <CommonHeader :title="title" @goback="$emit('goback')" />
     <section class="p-[8px] pt-[16px] flex-1 flex flex-col overflow-auto">
       <template v-if="!isHsAddEdit">
         <section class="flex items-center pb-[16px] border-b-[#35363B] border-[1px] border-solid">
@@ -63,8 +56,8 @@
             v-show="isShowCheckBoxs"
             class="w-[90%] position-absolute bottom-[8px] left-[50%] translate-x-[-50%]"
             @click="$emit('bacthDel')"
-            >确认删除</n-button
-          >
+            >确认删除
+          </n-button>
         </section>
       </template>
       <slot name="detail" v-else></slot>
@@ -74,6 +67,7 @@
 
 <script setup>
 import { ref } from 'vue'
+import CommonHeader from './common-header.vue'
 
 const props = defineProps({
   hsType: {

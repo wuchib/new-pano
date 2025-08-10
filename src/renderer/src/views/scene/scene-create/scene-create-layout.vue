@@ -5,6 +5,17 @@
       <n-button
         :color="'#313135'"
         strong
+        class="text-[#fff]/85 position-absolute z-1 cursor-pointer left-10px top-10px"
+        @click="back"
+      >
+        <template #icon>
+          <i class="i-ri:arrow-go-back-line"></i>
+        </template>
+        返回
+      </n-button>
+      <n-button
+        :color="'#313135'"
+        strong
         class="text-[#fff]/85 position-absolute z-1 cursor-pointer right-10px top-10px"
         @click="saveTest"
         >保存</n-button
@@ -39,6 +50,10 @@
       </ul>
       <!-- 功能面板 -->
       <section class="flex-1 h-full overflow-y-hidden">
+        <!-- 基础信息面板 -->
+        <BaseBoard v-if="curFunc === 'base'" ref="BaseBoardRef"></BaseBoard>
+        <!-- 视角面板 -->
+        <ViewBoard v-if="curFunc === 'angle'" ref="ViewBoardRef" />
         <!-- 热点面板 -->
         <HotspotBoard
           ref="HotspotBoardRef"
@@ -84,11 +99,14 @@ import {
 import { v4 as uuidv4 } from 'uuid'
 import { useMessage, useDialog } from 'naive-ui'
 import { isEqual, cloneDeep, has } from 'lodash'
+import BaseBoard from './board/base.vue'
+import ViewBoard from './board/view/view.vue'
 import HotspotBoard from './board/hotspot/hotspot.vue'
 import PaintBoard from './board/graphics/paint.vue'
 import useHs from './board/hotspot/useHs'
 import useGraphics from './board/graphics/useGraphics'
-
+import { useRouter } from 'vue-router'
+const router = useRouter()
 const message = useMessage()
 const isAddEdit = ref(false) // 是否进入添加/编辑热点页面
 const isEdit = ref(false) // 是否在编辑热点
@@ -108,6 +126,8 @@ let polygonHsInstance = null // 多边形绘制热点实例
 /**@type {Event} */
 let eventInstance = null
 /** 一些实例 */
+const BaseBoardRef = ref()
+const ViewBoardRef = ref()
 const HotspotBoardRef = ref()
 const paintBoardRef = ref()
 
@@ -367,14 +387,19 @@ function nDialogForBack() {
   })
 }
 
+// 返回
+function back() {
+  router.go(-1)
+}
+
 // 保存
 async function saveTest() {
   const res = await window.customApi.saveScene({
-    base:{
+    base: {
       id: uuidv4()
     }
   })
-  console.log(res);
+  console.log(res)
 }
 
 provide('isAddEdit', isAddEdit)
