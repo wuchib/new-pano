@@ -39,7 +39,7 @@
           class="w-[60px] h-[58px] flex flex-col justify-center items-center cursor-pointer mt-[16px] rounded-[6px]"
           :class="
             curFunc === func.id
-              ? 'bg-[#0099FF]/15 color-[#0099FF]'
+              ? 'bg-[#4b9e5f]/15 color-[#4b9e5f]'
               : 'hover:bg-[#2A2B30] color-[#ffffff]/65'
           "
           @click="changFuncModule(func)"
@@ -53,7 +53,13 @@
         <!-- 基础信息面板 -->
         <BaseBoard v-if="curFunc === 'base'" ref="BaseBoardRef"></BaseBoard>
         <!-- 视角面板 -->
-        <ViewBoard v-if="curFunc === 'angle'" ref="ViewBoardRef" />
+        <ViewBoard
+          v-if="curFunc === 'angle'"
+          ref="ViewBoardRef"
+          @changeMin="changeViewMin"
+          @changeCenter="changeViewCenter"
+          @changeMax="changeViewMax"
+        />
         <!-- 热点面板 -->
         <HotspotBoard
           ref="HotspotBoardRef"
@@ -105,6 +111,7 @@ import HotspotBoard from './board/hotspot/hotspot.vue'
 import PaintBoard from './board/graphics/paint.vue'
 import useHs from './board/hotspot/useHs'
 import useGraphics from './board/graphics/useGraphics'
+import useView from './board/view/useView'
 import { useRouter } from 'vue-router'
 const router = useRouter()
 const message = useMessage()
@@ -127,11 +134,10 @@ let polygonHsInstance = null // 多边形绘制热点实例
 let eventInstance = null
 /** 一些实例 */
 const BaseBoardRef = ref()
-const ViewBoardRef = ref()
 const HotspotBoardRef = ref()
 const paintBoardRef = ref()
 
-const curFunc = ref('mark') // 当前选中的功能
+const curFunc = ref('angle') // 当前选中的功能
 const funcList = ref([
   { id: 'base', icon: 'i-ri:article-line', label: '基础' },
   { id: 'angle', icon: 'i-ri:eye-line', label: '视角' },
@@ -183,6 +189,8 @@ const {
   curEntityId
 })
 
+const { ViewBoardRef, changeViewMin, changeViewCenter, changeViewMax, setInstance:setInsView, setViewConifg } = useView()
+
 onMounted(async () => {
   await initKrpanoInstance()
   const sceneId = uuidv4()
@@ -218,6 +226,10 @@ onMounted(async () => {
       tipPosition: curEntity.value._hs.meta.tipPosition,
       points: curEntity.value._hs.point.getArray()
     })
+  })
+  eventInstance.registerEvent('onviewchanged', () =>{
+    const { fov } = krpano.view
+    setViewConifg({ fov })
   })
 })
 
@@ -256,6 +268,7 @@ async function initKrpanoInstance() {
     _viewInstance: viewInstance,
     _commonHsInstance: commonHsInstance
   })
+  setInsView(krpano)
 }
 
 // 切换功能模块

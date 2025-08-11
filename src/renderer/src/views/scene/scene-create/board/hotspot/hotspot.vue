@@ -20,7 +20,7 @@
             class="h-[68px] flex flex-col justify-center items-center rounded-[4px] cursor-pointer"
             :class="
               config.url === hs.url
-                ? 'bg-[#0099FF]/15 text-[#008AFF]'
+                ? 'bg-[#4b9e5f]/15 text-[#4b9e5f]'
                 : 'hover:bg-[#2A2B30] text-[#fff]'
             "
             v-for="hs in hsIconOpt"

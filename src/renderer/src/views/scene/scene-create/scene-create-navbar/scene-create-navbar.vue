@@ -28,8 +28,8 @@
           class="navbar-scene-item ml-[8px] rounded-[4px] overflow-hidden cursor-pointer p-[2px] select-none position-relative"
           :class="
             curSceneId === scene.id
-              ? 'border-[#0099FF] border-[2px] border-solid'
-              : 'hover:border-[#0099FF] border-[2px] border-solid'
+              ? 'border-[#4b9e5f] border-[2px] border-solid'
+              : 'hover:border-[#4b9e5f] border-[2px] border-solid'
           "
           v-for="scene in curGroupData.sceneList"
           :key="scene.id"
@@ -57,7 +57,7 @@
       <li
         class="navbar-group-item ml-[4px]"
         v-for="group in groups"
-        :class="curGroupId === group.id ? 'bg-[#0099FF]' : 'hover:bg-[#2A2B30]'"
+        :class="curGroupId === group.id ? 'bg-[#4b9e5f]' : 'hover:bg-[#2A2B30]'"
         :key="group.id"
         @click="curGroupId = group.id"
       >

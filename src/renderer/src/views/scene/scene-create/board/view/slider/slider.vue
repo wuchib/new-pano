@@ -1,36 +1,38 @@
 <template>
-  <div class="slide-wrap">
-    <!--  -->
-    <div class="slide-main flex-fac">
-      <section ref="slideSlotRef" class="slide-slot">
+  <div class="slide-wrap w-full px-[8px]">
+    <div class="slide-main flex items-center h-[16px] w-full bg-transparent relative">
+      <section ref="slideSlotRef" class="slide-slot w-full h-[6px] rounded-full overflow-hidden bg-[#35363b] relative">
         <section
           ref="slideActiveRef"
-          class="slide-active"  
+          class="slide-active absolute h-full bottom-0 top-0 bg-gradient-to-r from-[#4b9e5f] to-[#4b9e5f] rounded-full"
           :style="{ left: lx + '%', right: rx + '%' }"
         ></section>
       </section>
       <div
         @mousedown="btnDrag"
-        class="slide-btn"
+        class="slide-btn absolute left-0 top-0 w-[16px] h-[16px] border-2 border-[#4b9e5f] bg-white cursor-pointer -translate-x-1/2 rounded-full z-[99]"
         :style="{
           left: btnx + '%',
           transition: hasTransition ? 'left .3s ease' : '',
         }"
       >
-        <div class="slide-num" v-show="isDraggingC">
+        <div class="slide-num absolute left-1/2 -translate-x-1/2 -translate-y-[90%] top-0 p-[4px] text-[12px] rounded text-[#fff]" v-show="isDraggingC">
           {{ modelValue }}
         </div>
       </div>
     </div>
-    <!--  -->
-    <div class="slide-range">
-      <div class="range-left" :style="{ left: lx + '%' }">
-        <i @mousedown="lDrag" class="i-ri:price-tag-fill text-[#fff]/85 cursor-pointer"></i>
-        <div class="num">{{ min }}</div>
+    <div class="slide-range relative h-[42px] w-full">
+      <div class="range-left absolute left-0 top-0 -translate-x-1/2" :style="{ left: lx + '%' }">
+        <i @mousedown="lDrag" class="i-ri:price-tag-fill text-white/85 cursor-pointer"></i>
+        <div class="num absolute top-[25px] left-1/2 -translate-x-1/2 bg-[#0d0e0e]/80 w-[28px] h-[24px] rounded flex justify-center items-center text-[12px] p-[4px] text-white">
+          {{ min }}
+        </div>
       </div>
-      <div class="range-right" :style="{ right: rx + '%' }">
-        <i @mousedown="rDrag" class="i-ri:price-tag-fill text-[#fff]/85 cursor-pointer"></i>
-        <div class="num">{{ max }}</div>
+      <div class="range-right absolute right-0 top-0 translate-x-1/2" :style="{ right: rx + '%' }">
+        <i @mousedown="rDrag" class="i-ri:price-tag-fill text-white/85 cursor-pointer"></i>
+        <div class="num absolute top-[25px] left-1/2 -translate-x-1/2 bg-[#0d0e0e]/80 w-[28px] h-[24px] rounded flex justify-center items-center text-[12px] p-[4px] text-white">
+          {{ max }}
+        </div>
       </div>
     </div>
   </div>
@@ -104,6 +106,10 @@ onMounted(() => {
   bindDom3(slideSlotRef.value, slideActiveRef.value);
 });
 
+watch(()=>props.modelValue,(val)=>{
+  // btnx.value = val 
+})
+
 watch(
   () => lx.value,
   (val) => {
@@ -139,101 +145,3 @@ defineExpose({
   setPositionR,
 });
 </script>
-
-<style scoped lang="less">
-.slide-wrap {
-  width: 100%;
-  padding: 0 8px;
-}
-.slide-main {
-  height: 16px;
-  width: 100%;
-  background: transparent;
-  position: relative;
-  .slide-slot {
-    width: 100%;
-    height: 6px;
-    border-radius: 10px;
-    overflow: hidden;
-    background: #35363b;
-    position: relative;
-    .slide-active {
-      position: absolute;
-      height: 100%;
-      left: 0%;
-      right: 0%;
-      bottom: 0;
-      top: 0;
-      background: linear-gradient(90deg, #0055ff 0%, #0099ff 100%);
-      border-radius: 10px;
-    }
-  }
-  .slide-btn {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 16px;
-    height: 16px;
-    border: 2px solid #0099ff;
-    background: #ffffff;
-    cursor: pointer;
-    transform: translateX(-50%);
-    border-radius: 50%;
-    z-index: 99;
-    // &:hover {
-    //   .slide-num {
-    //     display: block;
-    //   }
-    // }
-    .slide-num {
-      position: absolute;
-      left: 50%;
-      transform: translate(-50%, -90%);
-      top: 0;
-      padding: 4px;
-      font-size: 12px;
-      border-radius: 4px;
-      // display: none;
-    }
-  }
-}
-.slide-range {
-  position: relative;
-  height: 42px;
-  width: 100%;
-  .range-left {
-    transform: translateX(-50%);
-    position: absolute;
-    left: 0;
-    top: 0;
-    > img {
-      cursor: pointer;
-    }
-  }
-  .range-right {
-    position: absolute;
-    transform: translateX(50%);
-    right: 0;
-    top: 0;
-    > img {
-      cursor: pointer;
-    }
-  }
-  .num {
-    position: absolute;
-    top: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: rgba(13, 14, 14, 0.8);
-    width: 28px;
-    height: 24px;
-    border-radius: 4px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 12px;
-    padding: 4px;
-    color: #ffffff;
-  }
-}
-</style>
