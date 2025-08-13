@@ -106,10 +106,6 @@ onMounted(() => {
   bindDom3(slideSlotRef.value, slideActiveRef.value);
 });
 
-watch(()=>props.modelValue,(val)=>{
-  // btnx.value = val 
-})
-
 watch(
   () => lx.value,
   (val) => {

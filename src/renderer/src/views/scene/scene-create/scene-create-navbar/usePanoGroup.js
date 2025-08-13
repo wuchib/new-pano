@@ -1,7 +1,11 @@
-import { computed, ref } from 'vue'
+import { computed, h, ref, watch } from 'vue'
 import { initGroups } from '../common/mock'
+import { useDialog, NInput } from 'naive-ui'
+import { v4 as uuidv4 } from 'uuid'
+import { cloneDeep } from 'lodash'
 
-function usePanoGroup() {
+function usePanoGroup({emits}) {
+    const dialog = useDialog()
     const groups = ref(initGroups) // 分组列表
     const curGroupId = ref('group_1') // 当前选中的分组id
     const curSceneId = ref('scene_1_1') // 当前选中的场景id
@@ -24,13 +28,66 @@ function usePanoGroup() {
         return target
     })
 
+    const newName = ref('')
+    // 新增分组
+    function addGroup() {
+        dialog.create({
+            title: () => h('div', { class: 'text-[14px]' }, '请输入分组名称'),
+            showIcon: false,
+            positiveText: '确定',
+            negativeText: '取消',
+            content: () => h(NInput, {
+                class: 'mt-[8px]',
+                maxlength: 20,
+                showCount: true,
+                value: newName.value, // 绑定值
+                'onUpdate:value': (val) => (newName.value = val), // 更新值
+            }),
+            onPositiveClick: confirmAddGroup,
+            onNegativeClick: () => {
+                newName.value = ''
+            }
+        })
+    }
+
+    // 确认新增分组
+    function confirmAddGroup() {
+        const id = uuidv4()
+        const newG = {
+            id,
+            name: newName.value,
+            sceneList: []
+        }
+        groups.value.push(newG)
+        newName.value = ''
+    }
+
+    // 新增全景照片
+    async function addPano(type) {
+        if (type === 'local') {
+            const urls = await window.customApi.checkLocalPano()
+            const newPano = { id: uuidv4(), name: '图片', url: urls[0] }
+            curGroupData.value.sceneList.push(newPano)
+            emits('addPano',cloneDeep(newPano))
+        }
+    }
+
+    function togglePano(pano){
+        curSceneId.value = pano.id
+        emits('togglePano',pano)
+    }
+    
+    
     return {
         groups,
         curGroupId,
         curSceneId,
         curGroupData,
         curSceneData,
-        sceneHandleOpt
+        sceneHandleOpt,
+        togglePano,
+        addGroup,
+        addPano
     }
 }
 

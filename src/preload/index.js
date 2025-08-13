@@ -12,8 +12,8 @@ if (process.contextIsolated) {
     contextBridge.exposeInMainWorld('electron', electronAPI)
     contextBridge.exposeInMainWorld('api', api)
     contextBridge.exposeInMainWorld('customApi', {
-      getCurrentTime: () => ipcRenderer.invoke('get-current-time'),
-      saveScene: (sceneData) => ipcRenderer.invoke('save-scene', sceneData)
+      saveScene: (sceneData) => ipcRenderer.invoke('save-scene', sceneData), // 保存场景
+      checkLocalPano: () => ipcRenderer.invoke('check-local-pano') // 选择本地全景图片
     })
   } catch (error) {
     console.error(error)

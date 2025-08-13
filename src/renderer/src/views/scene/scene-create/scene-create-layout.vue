@@ -25,7 +25,7 @@
         class="w-full h-full position-absolute left-0 top-0 z-0"
       ></section>
       <!-- 分组列表 -->
-      <panoNavbar />save
+      <panoNavbar @addPano="createPano" @togglePano="togglePano" />
     </main>
     <!-- 侧边编辑容器 -->
     <aside class="h-full w-[380px] bg-[#1f2024] flex">
@@ -189,7 +189,14 @@ const {
   curEntityId
 })
 
-const { ViewBoardRef, changeViewMin, changeViewCenter, changeViewMax, setInstance:setInsView, setViewConifg } = useView()
+const {
+  ViewBoardRef,
+  changeViewMin,
+  changeViewCenter,
+  changeViewMax,
+  setInstance: setInsView,
+  setViewConifg
+} = useView()
 
 onMounted(async () => {
   await initKrpanoInstance()
@@ -227,9 +234,8 @@ onMounted(async () => {
       points: curEntity.value._hs.point.getArray()
     })
   })
-  eventInstance.registerEvent('onviewchanged', () =>{
-    const { fov } = krpano.view
-    setViewConifg({ fov })
+  eventInstance.registerEvent('onviewchanged', () => {
+    setViewConifg()
   })
 })
 
@@ -413,6 +419,15 @@ async function saveTest() {
     }
   })
   console.log(res)
+}
+
+function createPano(newPano) {
+  const { id: sceneId, url: imgUrl } = newPano
+  sceneInstance.addSceneInKp({ sceneId, imgUrl })
+}
+
+function togglePano(pano){
+  sceneInstance.loadSceneAsync(pano.id)
 }
 
 provide('isAddEdit', isAddEdit)

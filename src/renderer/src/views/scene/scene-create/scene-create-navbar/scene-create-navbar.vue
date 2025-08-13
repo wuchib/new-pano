@@ -16,14 +16,16 @@
       :style="{ ...slideMainStyle, ...transition }"
     >
       <ul class="overflow-auto position-relative whitespace-nowrap">
-        <li class="navbar-scene-item p-[2px] select-none">
-          <div
-            class="w-full h-full flex flex-col justify-center items-center rounded-[4px] text-[#fff]/65 border-[#404147] bg-[#24262a] border-dashed border-[1px] gap-[12px] text-[#fff]/65 cursor-pointer hover:opacity-[0.8]"
-          >
-            <i class="i-ri:add-line text-[16px]"></i>
-            <span class="">添加全景照片</span>
-          </div>
-        </li>
+        <n-dropdown trigger="click" placement="top" :options="addPanoOpt" @select="addPano">
+          <li class="navbar-scene-item p-[2px] select-none">
+            <div
+              class="w-full h-full flex flex-col justify-center items-center rounded-[4px] text-[#fff]/65 border-[#404147] bg-[#24262a] border-dashed border-[1px] gap-[12px] text-[#fff]/65 cursor-pointer hover:opacity-[0.8]"
+            >
+              <i class="i-ri:add-line text-[16px]"></i>
+              <span class="">添加全景照片</span>
+            </div>
+          </li>
+        </n-dropdown>
         <li
           class="navbar-scene-item ml-[8px] rounded-[4px] overflow-hidden cursor-pointer p-[2px] select-none position-relative"
           :class="
@@ -33,10 +35,18 @@
           "
           v-for="scene in curGroupData.sceneList"
           :key="scene.id"
-          @click="curSceneId = scene.id"
+          @click="togglePano(scene)"
         >
-          <img class="w-full h-full rounded-[4px]" src="../../assets/cover.png" alt="" />
-          <n-dropdown trigger="click" :options="sceneHandleOpt" @select="(key)=>{handleSelect(scene, key)}">
+          <img class="w-full h-full rounded-[4px]" :src="scene.url" alt="" />
+          <n-dropdown
+            trigger="click"
+            :options="sceneHandleOpt"
+            @select="
+              (key) => {
+                handleSelect(scene, key)
+              }
+            "
+          >
             <div
               class="position-absolute top-[4px] right-[4px] px-[4px] rounded-[4px] bg-[#000]/85"
             >
@@ -51,7 +61,7 @@
     <ul class="overflow-auto position-relative z-1 whitespace-nowrap">
       <li class="navbar-group-item bg-[#2A2B30] hover:opacity-[0.8]">
         <i class="i-ri:add-line"></i>
-        <span class="text-[14px]">新增场景</span>
+        <span class="text-[14px]" @click="addGroup">新增分组</span>
       </li>
 
       <li
@@ -72,12 +82,28 @@ import { ref } from 'vue'
 import useFooterToggle from './useFooterToggle'
 import usePanoGroup from './usePanoGroup'
 
+const emits = defineEmits(['addPano','togglePano'])
+
+const addPanoOpt = ref([
+  { label:'本地图片', key: 'local' },
+  { label:'图库列表', key: 'self' },
+])
+
 const { isShowP, slideMainStyle, slideBtnStyle, slideIconStyle, transition } = useFooterToggle()
-const { groups, curGroupId, curSceneId, curGroupData, curSceneData, sceneHandleOpt } = usePanoGroup()
+const {
+  groups,
+  curGroupId,
+  curSceneId,
+  curGroupData,
+  curSceneData,
+  sceneHandleOpt,
+  addGroup,
+  addPano,
+  togglePano
+} = usePanoGroup({ emits })
 
-
-function handleSelect(scene, val){
-  console.log(scene,val);
+function handleSelect(scene, val) {
+  console.log(scene, val)
 }
 
 function togglePhotoList() {

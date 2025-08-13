@@ -6,7 +6,7 @@
         <h2 class="base-h2">初始视角</h2>
         <div
           ref="subPanoViewRef"
-          class="w-full h-[200px] overflow-hidden rounded-[4px] cursor-pointer"
+          class="w-full h-[200px] overflow-hidden rounded-[4px] cursor-pointer pointer-events-none"
         ></div>
       </div>
       <div class="mt-[16px]">
@@ -29,6 +29,8 @@
 import { onMounted, ref } from 'vue'
 import CommonHeader from '../../common/common-header.vue'
 import slider from './slider/slider.vue'
+import { v4 as uuidv4 } from 'uuid'
+
 import {
   Scene,
   initPanorama,
@@ -37,7 +39,7 @@ import {
   PolygonHs,
   Event
 } from '@renderer/utils/krpano/index.js'
-import { watch } from 'less'
+
 const emits = defineEmits([
   'changeMin',
   'changeCenter',
@@ -51,17 +53,27 @@ const config = ref({
   curFov: 60
 })
 
-
+const sliderRef = ref()
 const subPanoViewRef = ref(null)
 let krpano = null
+let viewInstance = null
+let sceneInstance = null
 onMounted(async () => {
   krpano = await initPanorama(subPanoViewRef.value)
+  viewInstance = new View(krpano);
+  sceneInstance = new Scene(krpano);
+  const sceneId = uuidv4()
+  const imgUrl = new URL(`../../../../../assets/img/panoPhoto.jpg`, import.meta.url).href
+  sceneInstance.addSceneInKp({ sceneId, imgUrl })
+  await sceneInstance.loadSceneAsync(sceneId)
 })
 
-const setConfig = ({fov}) => { 
-  console.log(fov);
-  config.value.curFov = fov
- }
+ const setConfig = ({ hlookat, vlookat, fov }) => {
+  if(!viewInstance) return
+  viewInstance.lookToView({ hlookat, vlookat, fov }, true);
+  config.val = fov - 30;
+  sliderRef.value.setPositionC(config.val);
+};
 
 defineExpose({ setConfig })
 </script>
