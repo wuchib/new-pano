@@ -13,7 +13,7 @@ function useView() {
     }
     function setViewConifg() {
         const { hlookat, vlookat, fov } = krpano.view;
-        ViewBoardRef.value.setConfig({ hlookat, vlookat, fov });
+        ViewBoardRef.value && ViewBoardRef.value.setConfig({ hlookat, vlookat, fov });
     }
     function setInstance(krp) {
         krpano = krp

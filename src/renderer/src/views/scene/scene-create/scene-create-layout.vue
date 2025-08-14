@@ -25,8 +25,18 @@
         class="w-full h-full position-absolute left-0 top-0 z-0"
       ></section>
       <!-- 分组列表 -->
-      <panoNavbar @addPano="createPano" @togglePano="togglePano" />
-    </main>
+      <panoNavbar 
+        :gid="curGroupId"
+        :pid="curPanoId"
+        :groups="groups"
+        :curGroupData="curGroupData"
+        :curPanoData="curPanoData"
+        @addPano="addPano" 
+        @togglePano="togglePano" 
+        @addGroup="addGroup" 
+        @toggleGroup="toggleGroup" 
+      />
+    </main> 
     <!-- 侧边编辑容器 -->
     <aside class="h-full w-[380px] bg-[#1f2024] flex">
       <!-- 功能栏 -->
@@ -92,7 +102,7 @@
 </template>
 
 <script setup>
-import { onMounted, provide, ref } from 'vue'
+import { onMounted, provide, ref, watch } from 'vue'
 import panoNavbar from './scene-create-navbar/scene-create-navbar.vue'
 import {
   Scene,
@@ -112,7 +122,9 @@ import PaintBoard from './board/graphics/paint.vue'
 import useHs from './board/hotspot/useHs'
 import useGraphics from './board/graphics/useGraphics'
 import useView from './board/view/useView'
+import usePanoGroup from './scene-create-navbar/usePanoGroup'
 import { useRouter } from 'vue-router'
+
 const router = useRouter()
 const message = useMessage()
 const isAddEdit = ref(false) // 是否进入添加/编辑热点页面
@@ -198,12 +210,25 @@ const {
   setViewConifg
 } = useView()
 
+// 分组列表状态和方法
+const {
+  groups,
+  curGroupId,
+  curPanoId,
+  curGroupData,
+  curPanoData,
+  addGroup,
+  addPano,
+  toggleGroup,
+  togglePano
+} = usePanoGroup()
+
 onMounted(async () => {
   await initKrpanoInstance()
   const sceneId = uuidv4()
-  const imgUrl = new URL(`../../../assets/img/panoPhoto.jpg`, import.meta.url).href
-  sceneInstance.addSceneInKp({ sceneId, imgUrl })
-  await sceneInstance.loadSceneAsync(sceneId)
+  // const imgUrl = new URL(`../../../assets/img/panoPhoto.jpg`, import.meta.url).href
+  // sceneInstance.addSceneInKp({ sceneId, imgUrl })
+  // await sceneInstance.loadSceneAsync(sceneId)
   eventInstance.registerEvent('onclick', () => {
     if (curFunc.value === 'hotspot') addHotspot()
   })
@@ -421,14 +446,21 @@ async function saveTest() {
   console.log(res)
 }
 
-function createPano(newPano) {
-  const { id: sceneId, url: imgUrl } = newPano
-  sceneInstance.addSceneInKp({ sceneId, imgUrl })
-}
+// function createPano(newPano) {
+//   const { id: sceneId, url: imgUrl } = newPano
+//   sceneInstance.addSceneInKp({ sceneId, imgUrl })
+// }
 
-function togglePano(pano){
-  sceneInstance.loadSceneAsync(pano.id)
-}
+watch(()=>curPanoData.value,(panoData)=>{
+  const sceneId = panoData.id
+  const imgUrl = panoData.url
+  sceneInstance.addSceneInKp({ sceneId, imgUrl })
+  sceneInstance.loadSceneAsync(sceneId)
+})
+
+// function togglePano(pano){
+//   sceneInstance.loadSceneAsync(pano.id)
+// }
 
 provide('isAddEdit', isAddEdit)
 provide('isEdit', isEdit)

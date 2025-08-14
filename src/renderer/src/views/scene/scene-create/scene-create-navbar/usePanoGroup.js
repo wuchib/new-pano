@@ -4,16 +4,12 @@ import { useDialog, NInput } from 'naive-ui'
 import { v4 as uuidv4 } from 'uuid'
 import { cloneDeep } from 'lodash'
 
-function usePanoGroup({emits}) {
+function usePanoGroup() {
     const dialog = useDialog()
     const groups = ref(initGroups) // 分组列表
     const curGroupId = ref('group_1') // 当前选中的分组id
-    const curSceneId = ref('scene_1_1') // 当前选中的场景id
+    const curPanoId = ref('scene_1_1') // 当前选中的场景id
 
-    const sceneHandleOpt = ref([
-        { key: 'copy', label: '复制' },
-        { key: 'del', label: '删除' },
-    ])
 
     // 当前选中的分组数据对象
     const curGroupData = computed(() => {
@@ -22,8 +18,9 @@ function usePanoGroup({emits}) {
         return target
     })
     // 当前选中的场景数据对象
-    const curSceneData = computed(() => {
-        const target = curGroupData.value.find(sc => sc.id === curSceneId.value)
+    const curPanoData = computed(() => {
+        if(curGroupData.value === null) return null
+        const target = curGroupData.value?.panoList?.find(sc => sc.id === curPanoId.value)
         if (!target) return null
         return target
     })
@@ -40,6 +37,7 @@ function usePanoGroup({emits}) {
                 class: 'mt-[8px]',
                 maxlength: 20,
                 showCount: true,
+                placeholder:'',
                 value: newName.value, // 绑定值
                 'onUpdate:value': (val) => (newName.value = val), // 更新值
             }),
@@ -56,38 +54,47 @@ function usePanoGroup({emits}) {
         const newG = {
             id,
             name: newName.value,
-            sceneList: []
+            panoList: []
         }
         groups.value.push(newG)
         newName.value = ''
+        if(groups.value.length === 1) curGroupId.value = id
     }
 
     // 新增全景照片
     async function addPano(type) {
+        console.log(type);
+        
         if (type === 'local') {
             const urls = await window.customApi.checkLocalPano()
             const newPano = { id: uuidv4(), name: '图片', url: urls[0] }
-            curGroupData.value.sceneList.push(newPano)
-            emits('addPano',cloneDeep(newPano))
+            curGroupData.value.panoList.push(newPano)
+            // emits('addPano',cloneDeep(newPano))
         }
     }
 
+    // 切换当前分组下的全景照片
     function togglePano(pano){
-        curSceneId.value = pano.id
-        emits('togglePano',pano)
+        curPanoId.value = pano.id
+        // emits('togglePano',pano)
+    }
+
+    // 切换分组
+    function toggleGroup(){
+
     }
     
     
     return {
         groups,
         curGroupId,
-        curSceneId,
+        curPanoId,
         curGroupData,
-        curSceneData,
-        sceneHandleOpt,
+        curPanoData,
         togglePano,
         addGroup,
-        addPano
+        addPano,
+        toggleGroup
     }
 }
 

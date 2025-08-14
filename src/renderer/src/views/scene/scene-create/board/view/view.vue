@@ -62,10 +62,10 @@ onMounted(async () => {
   krpano = await initPanorama(subPanoViewRef.value)
   viewInstance = new View(krpano);
   sceneInstance = new Scene(krpano);
-  const sceneId = uuidv4()
-  const imgUrl = new URL(`../../../../../assets/img/panoPhoto.jpg`, import.meta.url).href
-  sceneInstance.addSceneInKp({ sceneId, imgUrl })
-  await sceneInstance.loadSceneAsync(sceneId)
+  // const sceneId = uuidv4()
+  // const imgUrl = new URL(`../../../../../assets/img/panoPhoto.jpg`, import.meta.url).href
+  // sceneInstance.addSceneInKp({ sceneId, imgUrl })
+  // await sceneInstance.loadSceneAsync(sceneId)
 })
 
  const setConfig = ({ hlookat, vlookat, fov }) => {
