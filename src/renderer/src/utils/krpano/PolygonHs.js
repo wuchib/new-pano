@@ -805,7 +805,7 @@ export class PolygonHs extends CommonHs{
                     dragging: true,
                     bgborder:`1.5 0xF81010`,
                     visible: true,
-                    html:`<div>${i}</div>`
+                    // html:`<div>${i}</div>`
                 })
                 ctrlPoint.ath = ath
                 ctrlPoint.atv = atv

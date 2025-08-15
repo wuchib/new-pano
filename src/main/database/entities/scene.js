@@ -8,9 +8,8 @@ export const SceneEntity = new EntitySchema({
     tableName:'scene',
     columns: {
         id: {
-            type: 'int',
+            type: 'varchar',
             primary: true,
-            generated: true,
         },
         name: {
             type: 'varchar',

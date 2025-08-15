@@ -19,12 +19,17 @@
 <script setup>
 import { ref } from 'vue'
 import CommonHeader from '../common/common-header.vue'
+import { cloneDeep } from 'lodash'
 
 const emits = defineEmits(['goback'])
 
 const config = ref({
   name: ''
 })
+
+const getConfig = () => cloneDeep(config.value)
+
+defineExpose({ getConfig })
 </script>
 
 <style></style>

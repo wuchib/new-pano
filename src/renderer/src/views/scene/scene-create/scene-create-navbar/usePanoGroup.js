@@ -7,13 +7,14 @@ import { cloneDeep } from 'lodash'
 function usePanoGroup() {
     const dialog = useDialog()
     const groups = ref(initGroups) // 分组列表
-    const curGroupId = ref('group_1') // 当前选中的分组id
-    const curPanoId = ref('scene_1_1') // 当前选中的场景id
+    const curGroupId = ref('') // 当前选中的分组id
+    const curPanoId = ref('') // 当前选中的场景id
 
 
     // 当前选中的分组数据对象
     const curGroupData = computed(() => {
         const target = groups.value.find(g => g.id === curGroupId.value)
+        curPanoId.value = (target?.panoList && target.panoList.length > 0) ? target.panoList[0].id : ''
         if (!target) return null
         return target
     })
@@ -63,13 +64,13 @@ function usePanoGroup() {
 
     // 新增全景照片
     async function addPano(type) {
-        console.log(type);
         
         if (type === 'local') {
+            const id = uuidv4()
             const urls = await window.customApi.checkLocalPano()
-            const newPano = { id: uuidv4(), name: '图片', url: urls[0] }
+            const newPano = { id, name: '图片', url: urls[0] }
             curGroupData.value.panoList.push(newPano)
-            // emits('addPano',cloneDeep(newPano))
+            if(curGroupData.value.panoList.length === 1) curPanoId.value = id
         }
     }
 
@@ -80,8 +81,8 @@ function usePanoGroup() {
     }
 
     // 切换分组
-    function toggleGroup(){
-
+    function toggleGroup(gid){
+        curGroupId.value = gid
     }
     
     

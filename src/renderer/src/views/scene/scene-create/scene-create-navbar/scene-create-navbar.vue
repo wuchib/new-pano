@@ -75,7 +75,7 @@
         v-for="group in groups"
         :class="gid === group.id ? 'bg-[#4b9e5f]' : 'hover:bg-[#2A2B30]'"
         :key="group.id"
-        @click="$emit('toggleGroup')"
+        @click="$emit('toggleGroup',group.id)"
       >
         {{ group.name }}
       </li>

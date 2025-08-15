@@ -3,10 +3,11 @@ import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 import { AppDataSource } from './database/index'
-import Scene from "./database/model/scene";
+// import Scene from "./database/model/scene";
 import registerIpc from './ipc/index'
 
 let mainWindow
+let dbIns
 function createWindow() {
   // Create the browser window.
   mainWindow = new BrowserWindow({
@@ -47,10 +48,10 @@ app.whenReady().then(async () => {
   // Set app user model id for windows
 
   //===== 测试一下数据库连接以及插入数据 start
-  const dbIns = await AppDataSource.initialize()
-  const repository = dbIns.getRepository('Scene')
-  const scene1 = new Scene(null, "cbiu", "12345")
-  repository.insert(scene1)
+  dbIns = await AppDataSource.initialize()
+  // const repository = dbIns.getRepository('Scene')
+  // const scene1 = new Scene(null, "cbiu", "12345")
+  // repository.insert(scene1)
   //===== 测试一下数据库连接以及插入数据 end
 
   electronApp.setAppUserModelId('com.electron')
@@ -71,7 +72,7 @@ app.whenReady().then(async () => {
 
   // 注册ipc,构建通信
   createWindow()
-  registerIpc(mainWindow)
+  registerIpc(mainWindow, dbIns)
 
   app.on('activate', function () {
     // On macOS it's common to re-create a window in the app when the

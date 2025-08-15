@@ -14,10 +14,11 @@
         返回
       </n-button>
       <n-button
+        v-if="curPanoId"
         :color="'#313135'"
         strong
         class="text-[#fff]/85 position-absolute z-1 cursor-pointer right-10px top-10px"
-        @click="saveTest"
+        @click="saveScene"
         >保存</n-button
       >
       <section
@@ -25,18 +26,18 @@
         class="w-full h-full position-absolute left-0 top-0 z-0"
       ></section>
       <!-- 分组列表 -->
-      <panoNavbar 
+      <panoNavbar
         :gid="curGroupId"
         :pid="curPanoId"
         :groups="groups"
         :curGroupData="curGroupData"
         :curPanoData="curPanoData"
-        @addPano="addPano" 
-        @togglePano="togglePano" 
-        @addGroup="addGroup" 
-        @toggleGroup="toggleGroup" 
+        @addPano="addPano"
+        @togglePano="togglePano"
+        @addGroup="addGroup"
+        @toggleGroup="toggleGroup"
       />
-    </main> 
+    </main>
     <!-- 侧边编辑容器 -->
     <aside class="h-full w-[380px] bg-[#1f2024] flex">
       <!-- 功能栏 -->
@@ -61,10 +62,10 @@
       <!-- 功能面板 -->
       <section class="flex-1 h-full overflow-y-hidden">
         <!-- 基础信息面板 -->
-        <BaseBoard v-if="curFunc === 'base'" ref="BaseBoardRef"></BaseBoard>
+        <BaseBoard v-show="curFunc === 'base'" ref="BaseBoardRef"></BaseBoard>
         <!-- 视角面板 -->
         <ViewBoard
-          v-if="curFunc === 'angle'"
+          v-show="curFunc === 'angle'"
           ref="ViewBoardRef"
           @changeMin="changeViewMin"
           @changeCenter="changeViewCenter"
@@ -73,7 +74,7 @@
         <!-- 热点面板 -->
         <HotspotBoard
           ref="HotspotBoardRef"
-          v-if="curFunc === 'hotspot'"
+          v-show="curFunc === 'hotspot'"
           @changeHsConfig="changeHsConfig"
           @saveHs="saveHs"
           @delHs="delHs"
@@ -85,7 +86,7 @@
         <!-- 图形绘制面板 -->
         <PaintBoard
           ref="paintBoardRef"
-          v-if="curFunc === 'mark'"
+          v-show="curFunc === 'mark'"
           :beforeChangePaintType="beforeChangePaintType"
           @changeHsConfig="changeGraphicsConfig"
           @saveHs="saveGraphics"
@@ -102,7 +103,7 @@
 </template>
 
 <script setup>
-import { onMounted, provide, ref, watch } from 'vue'
+import { computed, onMounted, provide, ref, watch } from 'vue'
 import panoNavbar from './scene-create-navbar/scene-create-navbar.vue'
 import {
   Scene,
@@ -149,13 +150,20 @@ const BaseBoardRef = ref()
 const HotspotBoardRef = ref()
 const paintBoardRef = ref()
 
-const curFunc = ref('angle') // 当前选中的功能
-const funcList = ref([
+const curFunc = ref('base') // 当前选中的功能
+// const funcList = ref([
+//   { id: 'base', icon: 'i-ri:article-line', label: '基础' },
+//   { id: 'angle', icon: 'i-ri:eye-line', label: '视角' },
+//   { id: 'hotspot', icon: 'i-ri:aed-line', label: '热点' },
+//   { id: 'mark', icon: 'i-ri:mark-pen-line', label: '绘制' }
+// ])
+const initFuncList = [
   { id: 'base', icon: 'i-ri:article-line', label: '基础' },
   { id: 'angle', icon: 'i-ri:eye-line', label: '视角' },
   { id: 'hotspot', icon: 'i-ri:aed-line', label: '热点' },
   { id: 'mark', icon: 'i-ri:mark-pen-line', label: '绘制' }
-])
+]
+const funcList = computed(() => (curPanoId.value ? initFuncList : [initFuncList[0]]))
 const curEntity = ref(null) // 当前正在编辑的热点实体
 const curEntityId = ref('')
 const {
@@ -437,13 +445,17 @@ function back() {
 }
 
 // 保存
-async function saveTest() {
-  const res = await window.customApi.saveScene({
-    base: {
-      id: uuidv4()
-    }
-  })
-  console.log(res)
+async function saveScene() {
+  curGroupData.value.view = ViewBoardRef.value.getConfig()
+  curGroupData.value.hotspotList = cloneDeep(hsList.value)
+  curGroupData.value.graphicsList = cloneDeep(graphicsList.value)
+  const sceneJson = {
+    // id: uuidv4(),
+    id: 'fca23380-cbcc-4c66-a02a-919494',
+    base: BaseBoardRef.value.getConfig(),
+    groups: cloneDeep(curGroupData.value)
+  }
+  const res = await window.customApi.saveScene(sceneJson)
 }
 
 // function createPano(newPano) {
@@ -451,12 +463,16 @@ async function saveTest() {
 //   sceneInstance.addSceneInKp({ sceneId, imgUrl })
 // }
 
-watch(()=>curPanoData.value,(panoData)=>{
-  const sceneId = panoData.id
-  const imgUrl = panoData.url
-  sceneInstance.addSceneInKp({ sceneId, imgUrl })
-  sceneInstance.loadSceneAsync(sceneId)
-})
+watch(
+  () => curPanoData.value,
+  (panoData) => {
+    if (!panoData) return
+    const sceneId = panoData.id
+    const imgUrl = panoData.url
+    sceneInstance.addSceneInKp({ sceneId, imgUrl })
+    sceneInstance.loadSceneAsync(sceneId)
+  }
+)
 
 // function togglePano(pano){
 //   sceneInstance.loadSceneAsync(pano.id)

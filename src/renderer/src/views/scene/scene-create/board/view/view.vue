@@ -16,9 +16,21 @@
           v-model="config.curFov"
           v-model:min="config.minFov"
           v-model:max="config.maxFov"
-          @changeMin="(min)=>{ $emit('changeMin', min) } "
-          @changeCenter="(val)=>{ $emit('changeCenter', val) } "
-          @changeMax="(max)=>{ $emit('changeMax', max) }"
+          @changeMin="
+            (min) => {
+              $emit('changeMin', min)
+            }
+          "
+          @changeCenter="
+            (val) => {
+              $emit('changeCenter', val)
+            }
+          "
+          @changeMax="
+            (max) => {
+              $emit('changeMax', max)
+            }
+          "
         />
       </div>
     </section>
@@ -39,12 +51,9 @@ import {
   PolygonHs,
   Event
 } from '@renderer/utils/krpano/index.js'
+import { cloneDeep } from 'lodash'
 
-const emits = defineEmits([
-  'changeMin',
-  'changeCenter',
-  'changeMax',
-])
+const emits = defineEmits(['changeMin', 'changeCenter', 'changeMax'])
 
 const config = ref({
   name: '',
@@ -60,22 +69,24 @@ let viewInstance = null
 let sceneInstance = null
 onMounted(async () => {
   krpano = await initPanorama(subPanoViewRef.value)
-  viewInstance = new View(krpano);
-  sceneInstance = new Scene(krpano);
+  viewInstance = new View(krpano)
+  sceneInstance = new Scene(krpano)
   // const sceneId = uuidv4()
   // const imgUrl = new URL(`../../../../../assets/img/panoPhoto.jpg`, import.meta.url).href
   // sceneInstance.addSceneInKp({ sceneId, imgUrl })
   // await sceneInstance.loadSceneAsync(sceneId)
 })
 
- const setConfig = ({ hlookat, vlookat, fov }) => {
-  if(!viewInstance) return
-  viewInstance.lookToView({ hlookat, vlookat, fov }, true);
-  config.val = fov - 30;
-  sliderRef.value.setPositionC(config.val);
-};
+const setConfig = ({ hlookat, vlookat, fov }) => {
+  if (!viewInstance) return
+  viewInstance.lookToView({ hlookat, vlookat, fov }, true)
+  config.val = fov - 30
+  sliderRef.value.setPositionC(config.val)
+}
 
-defineExpose({ setConfig })
+const getConfig = () => cloneDeep(config.value)
+
+defineExpose({ setConfig, getConfig })
 </script>
 
 <style></style>

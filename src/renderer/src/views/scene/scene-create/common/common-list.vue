@@ -1,7 +1,7 @@
 <template>
   <div class="w-full h-full flex flex-col">
     <!-- 功能标题 -->
-    <CommonHeader :title="title" @goback="$emit('goback')" />
+    <CommonHeader :isBack="isHsAddEdit" :title="title" @goback="$emit('goback')" />
     <section class="p-[8px] pt-[16px] flex-1 flex flex-col overflow-auto">
       <template v-if="!isHsAddEdit">
         <section class="flex items-center pb-[16px] border-b-[#35363B] border-[1px] border-solid">
@@ -93,7 +93,7 @@ const props = defineProps({
   isShowCheckBoxs: {
     type: Boolean,
     default: false
-  }
+  },
 })
 const emits = defineEmits(['goback', 'handleBatchDel', 'editItem', 'bacthDel', 'enterAdd'])
 
