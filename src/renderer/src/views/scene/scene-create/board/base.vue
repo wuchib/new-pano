@@ -28,8 +28,9 @@ const config = ref({
 })
 
 const getConfig = () => cloneDeep(config.value)
+const setConfig = (cnf) => {config.value = { ...config.value, ...cnf }}
 
-defineExpose({ getConfig })
+defineExpose({ getConfig, setConfig })
 </script>
 
 <style></style>

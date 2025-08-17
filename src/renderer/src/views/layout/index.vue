@@ -18,7 +18,6 @@
       <RouterView />
     </main>
   </div>
-  <RouterView />
 </template>
 
 <script setup>

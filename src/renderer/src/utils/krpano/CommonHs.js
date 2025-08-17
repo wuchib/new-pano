@@ -125,7 +125,7 @@ export class CommonHs{
             hs.setvars({
                 distorted: false, dragging: true, renderer:'webgl',
                 url, ath, atv,
-                scale:1, alpha:1, zorder:1, visible: true
+                scale:.4, alpha:1, zorder:1, visible: true
             })
             this.addTip(hotspotName, txt, cssObj, backgroundalpha, backgroundcolor)
             isPreView && this.krpano.set(`hotspot[${PREFIXX_HS + id}].onloaded`,`do_crop_animation(128, 128, 30)`);

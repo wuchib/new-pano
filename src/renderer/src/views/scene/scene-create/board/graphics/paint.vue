@@ -135,11 +135,14 @@ function checkHsUrl(hs) {
     config.value.paintType = hs.id
     return
   }
-  props.beforeChangePaintType().then(()=>{
-    config.value.paintType = hs.id
-  }).catch(()=>{
-    message.warning('图形未保存时请勿切换工具')
-  })
+  props
+    .beforeChangePaintType()
+    .then(() => {
+      config.value.paintType = hs.id
+    })
+    .catch(() => {
+      message.warning('图形未保存时请勿切换工具')
+    })
 }
 
 function enterAddHotspot() {
@@ -156,6 +159,8 @@ const config = ref({
   borderSize: 2,
   // 组成图形的关键点位置信息
   points: [],
+  // 开始绘制的锚点
+  startEdge: '',
   // 控制点位置信息
   ctrlPoints: [],
   // 标签位置信息
@@ -204,7 +209,6 @@ watch(
     emits('changeHsConfig', { title, fontSize, fontColor, borderSize, paintType })
   }
 )
-
 
 let editOriginCnf = null
 

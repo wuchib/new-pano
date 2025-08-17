@@ -125,6 +125,18 @@ import useGraphics from './board/graphics/useGraphics'
 import useView from './board/view/useView'
 import usePanoGroup from './scene-create-navbar/usePanoGroup'
 import { useRouter } from 'vue-router'
+import { getAssetPath, getLeafNode } from '@renderer/utils'
+
+const props = defineProps({
+  status: {
+    type: String,
+    default: 'add'
+  },
+  curScene: {
+    type: Object,
+    default: () => ({})
+  }
+})
 
 const router = useRouter()
 const message = useMessage()
@@ -233,10 +245,6 @@ const {
 
 onMounted(async () => {
   await initKrpanoInstance()
-  const sceneId = uuidv4()
-  // const imgUrl = new URL(`../../../assets/img/panoPhoto.jpg`, import.meta.url).href
-  // sceneInstance.addSceneInKp({ sceneId, imgUrl })
-  // await sceneInstance.loadSceneAsync(sceneId)
   eventInstance.registerEvent('onclick', () => {
     if (curFunc.value === 'hotspot') addHotspot()
   })
@@ -262,6 +270,7 @@ onMounted(async () => {
     )
     // 绘制完毕后更新控制点位置信息和标签位置信息
     paintBoardRef.value.setConfig({
+      startEdge: curEntity.value._hs.meta.startEdge,
       ctrlPoints: curEntity.value._hs.meta.ctrlPoints,
       tipPosition: curEntity.value._hs.meta.tipPosition,
       points: curEntity.value._hs.point.getArray()
@@ -270,7 +279,26 @@ onMounted(async () => {
   eventInstance.registerEvent('onviewchanged', () => {
     setViewConifg()
   })
+  // 判断状态 '添加' | '编辑' | '预览'
+  judgeStatus()
 })
+
+function judgeStatus() {
+  const statusHash = {
+    add: () => {},
+    edit: async () => {
+      // 获取数据
+      const { id } = props.curScene
+      const sceneData = await window.customApi.getSceneJsonById(id)
+      // 数据回显
+      groups.value = sceneData.groups
+      BaseBoardRef.value.setConfig({ name: sceneData.base.name })
+      curGroupId.value = groups.value[0].id
+    },
+    preview: () => {}
+  }
+  statusHash[props.status]()
+}
 
 function dragCb(ath, atv, points) {
   const hash = {
@@ -444,24 +472,24 @@ function back() {
   router.go(-1)
 }
 
-// 保存
+// 保存场景文件
 async function saveScene() {
-  curGroupData.value.view = ViewBoardRef.value.getConfig()
-  curGroupData.value.hotspotList = cloneDeep(hsList.value)
-  curGroupData.value.graphicsList = cloneDeep(graphicsList.value)
+  const base = BaseBoardRef.value.getConfig()
+  if (base.name === '') {
+    message.warning('请输入场景名称')
+    return
+  }
+  curPanoData.value.view = ViewBoardRef.value.getConfig()
+  curPanoData.value.hotspotList = cloneDeep(hsList.value)
+  curPanoData.value.graphicsList = cloneDeep(graphicsList.value)
   const sceneJson = {
-    // id: uuidv4(),
-    id: 'fca23380-cbcc-4c66-a02a-919494',
-    base: BaseBoardRef.value.getConfig(),
-    groups: cloneDeep(curGroupData.value)
+    id: uuidv4(),
+    base,
+    groups: cloneDeep(groups.value)
   }
   const res = await window.customApi.saveScene(sceneJson)
+  if (res) message.success('保存成功')
 }
-
-// function createPano(newPano) {
-//   const { id: sceneId, url: imgUrl } = newPano
-//   sceneInstance.addSceneInKp({ sceneId, imgUrl })
-// }
 
 watch(
   () => curPanoData.value,
@@ -471,6 +499,21 @@ watch(
     const imgUrl = panoData.url
     sceneInstance.addSceneInKp({ sceneId, imgUrl })
     sceneInstance.loadSceneAsync(sceneId)
+    hsList.value = cloneDeep(panoData.hotspotList || [])
+    graphicsList.value = cloneDeep(panoData.graphicsList || [])
+    hsList.value.forEach((hs) => {
+      const imgName = getLeafNode(hs.url)
+      const url = getAssetPath(imgName)
+      const { id, ath, atv, title: txt } = hs
+      const cssObj = { 'font-size': hs.fontSize, 'color': hs.fontColor }
+      const params = { id, url, ath, atv, txt, cssObj }
+      commonHsInstance.loadHotspot(params)
+    })
+    graphicsList.value.forEach(g=>{
+      const { id, borderColor, borderSize, points, title, fontSize: titleFontSize, startEdge, ctrlPoints, paintType: customType, tipPosition } = g
+      const params = { id, borderColor, borderSize, points, title, titleFontSize, startEdge, ctrlPoints, customType, tipPosition }
+      polygonHsInstance.loadPolygon(params)
+    })
   }
 )
 

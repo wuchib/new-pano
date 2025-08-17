@@ -3,7 +3,7 @@
     <!-- 筛选及操作按钮 -->
     <div class="w-full flex justify-between items-center">
       <div class="flex">
-        <n-input placeholder="根据场景名搜索">
+        <n-input v-model:value="keyWord" placeholder="根据场景名搜索" @keyup.enter="getSceneList">
           <template #suffix> <i class="i-ri:search-line cursor-pointer"></i> </template>
         </n-input>
       </div>
@@ -35,7 +35,7 @@
         v-if="curView === 'img'"
       >
         <div
-          v-for="value in 60"
+          v-for="scene in sceneList"
           class="flex flex-col h-[230px] border-[#414141] border-solid border-[1px] rounded-[6px] overflow-hidden group"
         >
           <div class="flex-1 overflow-hidden position-relative">
@@ -48,7 +48,10 @@
               >
                 <n-tooltip trigger="hover">
                   <template #trigger>
-                    <i class="i-ri:eye-line text-[30px] text-[#fff]/65 cursor-pointer"></i>
+                    <i
+                      class="i-ri:eye-line text-[30px] text-[#fff]/65 cursor-pointer"
+                      @click="enterPreview(scene)"
+                    ></i>
                   </template>
                   预览
                 </n-tooltip>
@@ -56,7 +59,10 @@
               <div class="flex justify-center items-center flex-1 h-full">
                 <n-tooltip trigger="hover">
                   <template #trigger>
-                    <i class="i-ri:edit-2-line text-[30px] text-[#fff]/65 cursor-pointer"></i>
+                    <i
+                      class="i-ri:edit-2-line text-[30px] text-[#fff]/65 cursor-pointer"
+                      @click="enterEdit(scene)"
+                    ></i>
                   </template>
                   编辑
                 </n-tooltip>
@@ -66,8 +72,8 @@
           <div
             class="flex flex-col justify-center gap-[4px] h-[70px] border-0 border-t-[1px] border-solid border-[#414141] px-[12px] text-[#fff]/65"
           >
-            <div class="text-[16px]">场景名称巴拉巴拉</div>
-            <div class="text-[14px]">2025-08-08 12:00:00</div>
+            <div class="text-[16px]">{{ scene.name }}</div>
+            <div class="text-[14px]">{{ transTime(scene.createdAt) }}</div>
           </div>
         </div>
       </div>
@@ -77,7 +83,7 @@
     <!-- 分页 -->
     <div class="w-full flex justify-end items-center">
       <n-pagination
-        v-model:page="page"
+        v-model:page="pageNo"
         v-model:page-size="pageSize"
         :page-count="100"
         show-size-picker
@@ -88,8 +94,9 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { transTime } from '@renderer/utils/index'
 const router = useRouter()
 const curView = ref('img')
 const views = ref([
@@ -103,8 +110,51 @@ function getRounded(i) {
 }
 
 // 进入新增场景
-function enterAddScene(){
-    router.push('/sceneCreate')
+function enterAddScene() {
+  router.push('/sceneCreate')
 }
 
+const sceneList = ref([])
+const keyWord = ref('')
+const pageNo = ref(1)
+const pageSize = ref(10)
+const total = ref(0)
+
+// 获取场景列表
+async function getSceneList() {
+  const postData = {
+    keyWord: keyWord.value,
+    pageNo: pageNo.value,
+    pageSize: pageSize.value
+  }
+  const res = await window.customApi.getSceneList(postData)
+  sceneList.value = res.rows
+  total.value = res.total
+}
+
+// 进入预览
+function enterPreview() {
+  router.push({
+    path: '/sceneCreate',
+    query: {
+      status: 'preview',
+      sceneStr: JSON.stringify(scene)
+    }
+  })
+}
+
+// 进入编辑
+function enterEdit(scene) {
+  router.push({
+    path: '/sceneCreate',
+    query: {
+      status: 'edit',
+      sceneStr: JSON.stringify(scene)
+    }
+  })
+}
+
+onMounted(() => {
+  getSceneList()
+})
 </script>
