@@ -265,6 +265,7 @@ function bacthDel() {
 const getConfig = () => JSON.parse(JSON.stringify(config.value))
 const setConfig = (cnf) => {
   config.value = { ...config.value, ...cnf }
+  console.log(config.value);
 }
 
 /** 暴露出去的方法*/

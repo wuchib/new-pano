@@ -8,7 +8,8 @@ function useGraphics({
     isEdit,
     isAddEdit,
     curEntity,
-    curEntityId
+    curEntityId,
+    curFunc
 }) {
     const nDialog = useDialog()
     const message = useMessage()
@@ -53,6 +54,7 @@ function useGraphics({
             }
             graphicsList.value.push(newGraphics)
             polygonHsInstance.setPolygonClickEvent(curEntityId.value, () => {
+                curFunc.value = 'mark'
                 paintBoardRef.value.editHs(newGraphics, false)
             })
         }
@@ -186,8 +188,8 @@ function useGraphics({
     }
 
     // 图形拖拽时的回调(更新位置)
-    function graphicsDragCb(points) {
-        paintBoardRef.value.setConfig({ points })
+    function graphicsDragCb(ath,atv,points) {
+        paintBoardRef.value.setConfig({ points: cloneDeep(points) })
     }
     // 图形拖拽时的回调(更新标签位置)
     function graphicsDragUpdateTipCb(ath, atv) {
@@ -198,6 +200,7 @@ function useGraphics({
 
     // 图形控制点更新时的回调
     function updateCtrlPointsCb(ctrlPoints) {
+        console.log(ctrlPoints);
         paintBoardRef.value.setConfig({ ctrlPoints })
     }
 

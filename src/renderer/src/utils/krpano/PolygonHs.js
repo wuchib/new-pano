@@ -763,11 +763,13 @@ export class PolygonHs extends CommonHs{
         )
     }
     updateCtrlPoints(hs,customType){
+        console.log(hs,customType);
         const ctrlPoints = this.krpano.hotspot.getArray().filter(h=>h.name.includes(`${customType}_ctrl_`))
         ctrlPoints.forEach(p=>{
             const key = p.name.split('_ctrl_')[1]
             hs.meta.ctrlPoints[key] = { ath: p.ath, atv: p.atv}
         })
+        console.log(this.updateCtrlPointsCb,'callback');
         this.updateCtrlPointsCb && this.updateCtrlPointsCb(hs.meta.ctrlPoints)
     }
     
@@ -1442,6 +1444,7 @@ export class PolygonHs extends CommonHs{
                 })
                 
                 this.hsDragCb && this.hsDragCb(0, 0, hs.point.getArray().map( ({ ath, atv })=>({ ath, atv }) ))
+                this.updateCtrlPointsCb && this.updateCtrlPointsCb(hs.meta.ctrlPoints) 
                 this.updateTipPositionCb && this.updateTipPositionCb(hs.meta.tipPosition.ath, hs.meta.tipPosition.atv) 
                 this.editTipPosition(hs.name, preffix)
             }

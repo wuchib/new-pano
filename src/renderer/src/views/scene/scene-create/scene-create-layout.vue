@@ -195,7 +195,8 @@ const {
   isEdit,
   isAddEdit,
   curEntity,
-  curEntityId
+  curEntityId,
+  curFunc
 })
 
 const {
@@ -218,7 +219,8 @@ const {
   isEdit,
   isAddEdit,
   curEntity,
-  curEntityId
+  curEntityId,
+  curFunc
 })
 
 const {
@@ -300,27 +302,15 @@ function judgeStatus() {
   statusHash[props.status]()
 }
 
-function dragCb(ath, atv, points) {
-  const hash = {
-    hotspot: () => {
-      hsDragCb(ath, atv)
-    },
-    mark: () => {
-      graphicsDragCb(points)
-    }
-  }
-  return hash[curFunc.value]
-}
-
 // 初始化krpano工具实例
 async function initKrpanoInstance() {
   krpano = await initPanorama(panoViewerRef.value)
   sceneInstance = new Scene(krpano)
   viewInstance = new View(krpano)
-  commonHsInstance = new CommonHs(krpano, dragCb)
+  commonHsInstance = new CommonHs(krpano, hsDragCb)
   polygonHsInstance = new PolygonHs(
     krpano,
-    dragCb,
+    graphicsDragCb,
     () => {},
     graphicsDragUpdateTipCb,
     updateCtrlPointsCb
@@ -483,7 +473,7 @@ async function saveScene() {
   curPanoData.value.hotspotList = cloneDeep(hsList.value)
   curPanoData.value.graphicsList = cloneDeep(graphicsList.value)
   const sceneJson = {
-    id: uuidv4(),
+    id: props.status === 'edit' ? props.curScene.id : uuidv4(),
     base,
     groups: cloneDeep(groups.value)
   }
@@ -505,14 +495,44 @@ watch(
       const imgName = getLeafNode(hs.url)
       const url = getAssetPath(imgName)
       const { id, ath, atv, title: txt } = hs
-      const cssObj = { 'font-size': hs.fontSize, 'color': hs.fontColor }
+      const cssObj = { 'font-size': hs.fontSize, color: hs.fontColor }
       const params = { id, url, ath, atv, txt, cssObj }
       commonHsInstance.loadHotspot(params)
+      commonHsInstance.setHotspotClickEvent(hs.id, () => {
+        curFunc.value = 'hotspot'
+        HotspotBoardRef.value.editHs(hs, false)
+      })
     })
-    graphicsList.value.forEach(g=>{
-      const { id, borderColor, borderSize, points, title, fontSize: titleFontSize, startEdge, ctrlPoints, paintType: customType, tipPosition } = g
-      const params = { id, borderColor, borderSize, points, title, titleFontSize, startEdge, ctrlPoints, customType, tipPosition }
+    graphicsList.value.forEach((g) => {
+      const {
+        id,
+        borderColor,
+        borderSize,
+        points,
+        title,
+        fontSize: titleFontSize,
+        startEdge,
+        ctrlPoints,
+        paintType: customType,
+        tipPosition
+      } = g
+      const params = {
+        id,
+        borderColor,
+        borderSize,
+        points,
+        title,
+        titleFontSize,
+        startEdge,
+        ctrlPoints,
+        customType,
+        tipPosition
+      }
       polygonHsInstance.loadPolygon(params)
+      polygonHsInstance.setPolygonClickEvent(id, () => {
+        curFunc.value = 'mark'
+        paintBoardRef.value.editHs(g, false)
+      })
     })
   }
 )

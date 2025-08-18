@@ -8,7 +8,8 @@ function useHs({
     isEdit,
     isAddEdit,
     curEntity,
-    curEntityId
+    curEntityId,
+    curFunc
 }) {
     const nDialog = useDialog()
     const message = useMessage()
@@ -53,6 +54,8 @@ function useHs({
             targetHsCnf.title = title
             targetHsCnf.fontSize = fontSize
             targetHsCnf.fontColor = fontColor
+            targetHsCnf.ath = ath
+            targetHsCnf.atv = atv
         } else {
             const newHs = {
                 id: curEntityId.value,
@@ -60,6 +63,7 @@ function useHs({
             }
             hsList.value.push(newHs)
             commonHsInstance.setHotspotClickEvent(newHs.id, () => {
+                curFunc.value = 'hotspot'
                 HotspotBoardRef.value.editHs(newHs, false)
             }, false)
         }
@@ -158,6 +162,7 @@ function useHs({
     }
     // 拖拽热点时的回调
     function hsDragCb(ath, atv) {
+        console.log(ath, atv);
         HotspotBoardRef.value.setHsConfig({ ath, atv })
     }
 
