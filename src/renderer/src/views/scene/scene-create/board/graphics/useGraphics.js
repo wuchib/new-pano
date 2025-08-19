@@ -108,12 +108,9 @@ function useGraphics({
     function restoreGraphics(oldHsConfig) {
         const { _hs, _tip } = curEntity.value
         const curPoints = _hs.point.getArray()
-        curPoints.forEach(p => {
-            const target = oldHsConfig.points.find(op => op.name === p.name)
-            if (target) {
-                p.ath = target.ath
-                p.atv = target.atv
-            }
+        curPoints.forEach((p,i) => {
+            curPoints[i].ath = oldHsConfig.points[i].ath
+            curPoints[i].atv = oldHsConfig.points[i].atv
         });
         _tip.ath = oldHsConfig.tipPosition.ath
         _tip.atv = oldHsConfig.tipPosition.atv
@@ -200,7 +197,6 @@ function useGraphics({
 
     // 图形控制点更新时的回调
     function updateCtrlPointsCb(ctrlPoints) {
-        console.log(ctrlPoints);
         paintBoardRef.value.setConfig({ ctrlPoints })
     }
 

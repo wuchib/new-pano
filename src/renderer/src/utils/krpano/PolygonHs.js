@@ -1460,7 +1460,7 @@ export class PolygonHs extends CommonHs{
     * - title 文字标注内容
     * - titleFontSize 文字标注字体大小
     */
-    setPolygonTip(id, { title, titleFontSize, tipPosition },customType){
+    setPolygonTip(id, { title, titleFontSize, tipPosition, color="#ffffff" },customType){
         const hs = this.krpano.hotspot.getArray().find(item => item.name.includes(id) && !item.name.includes(TIP) && !item.name.includes(SCROLL))
         const hsName = hs.name
         if(!hs) return
@@ -1478,7 +1478,7 @@ export class PolygonHs extends CommonHs{
             oy: -20
         })
         if(!hsTip.html) {
-            hsTip.html = `<div style="box-sizing:border-box;padding:5px;font-size:${titleFontSize}px;color:#ffffff">${title}</div>`
+            hsTip.html = `<div style="box-sizing:border-box;padding:5px;font-size:${titleFontSize}px;color:${color}">${title}</div>`
             hsTip.visible = title !== '' && title !== undefined && title !== null
         }else{
             const htmlMsg = extractTextAndStyle(hsTip.html)
@@ -1601,7 +1601,7 @@ export class PolygonHs extends CommonHs{
                 })
             }
             if(customType!=='brush'){
-                this.setPolygonTip(id, { title, titleFontSize, tipPosition },customType)
+                this.setPolygonTip(id, { title, titleFontSize, tipPosition, color: borderColor },customType)
                 if(!hs.meta) hs.meta = {}
                 hs.meta.tipPosition = deepCopy(tipPosition)
             }

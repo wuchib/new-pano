@@ -21,6 +21,13 @@
         @click="saveScene"
         >保存</n-button
       >
+      <div v-show="curFunc === 'angle'" class="position-absolute z-10 left-[50%] top-[50%] transform-translate-x-[-50%] transform-translate-y-[-50%] h-[40%] w-[60%] border-dashed border-[#fff] border-[2px] pointer-events-none">
+        <n-button class="position-absolute bottom-[20px] left-[50%] transform-translate-x-[-50%] pointer-events-auto" @click="setViewConifg">把当前视角设为初始视角</n-button>
+        <div class="w-[10%] h-[10%] position-absolute left-[-3px] top-[-3px] border-0 border-t-[4px] border-l-[4px] border-[#fff] border-solid"></div>
+        <div class="w-[10%] h-[10%] position-absolute left-[-3px] bottom-[-3px] border-0 border-b-[4px] border-l-[4px] border-[#fff] border-solid"></div>
+        <div class="w-[10%] h-[10%] position-absolute right-[-3px] top-[-3px] border-0 border-t-[4px] border-r-[4px] border-[#fff] border-solid"></div>
+        <div class="w-[10%] h-[10%] position-absolute right-[-3px] bottom-[-3px] border-0 border-b-[4px] border-r-[4px] border-[#fff] border-solid"></div>
+      </div>
       <section
         ref="panoViewerRef"
         class="w-full h-full position-absolute left-0 top-0 z-0"
@@ -70,6 +77,7 @@
           @changeMin="changeViewMin"
           @changeCenter="changeViewCenter"
           @changeMax="changeViewMax"
+          @toBeginAngle="toBeginAngle"
         />
         <!-- 热点面板 -->
         <HotspotBoard
@@ -162,13 +170,8 @@ const BaseBoardRef = ref()
 const HotspotBoardRef = ref()
 const paintBoardRef = ref()
 
-const curFunc = ref('base') // 当前选中的功能
-// const funcList = ref([
-//   { id: 'base', icon: 'i-ri:article-line', label: '基础' },
-//   { id: 'angle', icon: 'i-ri:eye-line', label: '视角' },
-//   { id: 'hotspot', icon: 'i-ri:aed-line', label: '热点' },
-//   { id: 'mark', icon: 'i-ri:mark-pen-line', label: '绘制' }
-// ])
+const curFunc = ref('angle') // 当前选中的功能
+
 const initFuncList = [
   { id: 'base', icon: 'i-ri:article-line', label: '基础' },
   { id: 'angle', icon: 'i-ri:eye-line', label: '视角' },
@@ -229,7 +232,8 @@ const {
   changeViewCenter,
   changeViewMax,
   setInstance: setInsView,
-  setViewConifg
+  setViewConifg,
+  toBeginAngle
 } = useView()
 
 // 分组列表状态和方法
@@ -246,7 +250,7 @@ const {
 } = usePanoGroup()
 
 onMounted(async () => {
-  await initKrpanoInstance()
+  await initKrpanoInstance() // 初始化实例
   eventInstance.registerEvent('onclick', () => {
     if (curFunc.value === 'hotspot') addHotspot()
   })
@@ -278,9 +282,9 @@ onMounted(async () => {
       points: curEntity.value._hs.point.getArray()
     })
   })
-  eventInstance.registerEvent('onviewchanged', () => {
-    setViewConifg()
-  })
+  // eventInstance.registerEvent('onviewchanged', () => {
+  //   setViewConifg()
+  // })
   // 判断状态 '添加' | '编辑' | '预览'
   judgeStatus()
 })
@@ -483,13 +487,18 @@ async function saveScene() {
 
 watch(
   () => curPanoData.value,
-  (panoData) => {
+  async (panoData) => {
     if (!panoData) return
     const sceneId = panoData.id
     const imgUrl = panoData.url
-    sceneInstance.addSceneInKp({ sceneId, imgUrl })
-    sceneInstance.loadSceneAsync(sceneId)
-    hsList.value = cloneDeep(panoData.hotspotList || [])
+    sceneInstance.addSceneInKp({ sceneId, imgUrl }) // 添加主场景
+    await sceneInstance.loadSceneAsync(sceneId) // 加载主场景
+    const { minFov, maxFov, hlookat, vlookat, curFov } = panoData.view
+    viewInstance.setViewFovRange({ fovmin: minFov ? minFov + 30 : 30, fovmax: maxFov ? maxFov + 30 : 150 }) // 设置主场景缩放范围
+    viewInstance.lookToView({ hlookat, vlookat, fov: curFov + 30 }) // 设置主场景初始位置
+    ViewBoardRef.value.setSubPanoViewer(sceneId, imgUrl) // 添加和加载副场景
+    // ViewBoardRef.value.setConfig({ minFov, maxFov, hlookat, vlookat, curFov }) // 设置场景初始参数 以及副场景的位置和缩放范围
+    hsList.value = cloneDeep(panoData.hotspotList || []) 
     graphicsList.value = cloneDeep(panoData.graphicsList || [])
     hsList.value.forEach((hs) => {
       const imgName = getLeafNode(hs.url)
@@ -536,10 +545,6 @@ watch(
     })
   }
 )
-
-// function togglePano(pano){
-//   sceneInstance.loadSceneAsync(pano.id)
-// }
 
 provide('isAddEdit', isAddEdit)
 provide('isEdit', isEdit)

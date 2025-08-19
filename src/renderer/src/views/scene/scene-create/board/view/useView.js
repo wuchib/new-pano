@@ -11,9 +11,12 @@ function useView() {
     function changeViewMax(val) {
         if (krpano) krpano.view.fovmax = val + 30
     }
+    function toBeginAngle({ curFov, vlookat, hlookat, minFov, maxFov }) {
+        if (krpano) krpano.actions.lookto(hlookat, vlookat, curFov + 30, "smooth", true, true)
+    }
     function setViewConifg() {
         const { hlookat, vlookat, fov } = krpano.view;
-        ViewBoardRef.value && ViewBoardRef.value.setConfig({ hlookat, vlookat, fov });
+        ViewBoardRef.value && ViewBoardRef.value.setConfig({ hlookat, vlookat, fov: fov });
     }
     function setInstance(krp) {
         krpano = krp
@@ -25,7 +28,8 @@ function useView() {
         changeViewCenter,
         changeViewMax,
         setViewConifg,
-        setInstance
+        setInstance,
+        toBeginAngle
     }
 }
 
