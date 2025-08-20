@@ -64,7 +64,6 @@ function usePanoGroup() {
 
     // 新增全景照片
     async function addPano(type) {
-        
         if (type === 'local') {
             const id = uuidv4()
             const urls = await window.customApi.checkLocalPano()

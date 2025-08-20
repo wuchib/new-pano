@@ -21,12 +21,28 @@
         @click="saveScene"
         >保存</n-button
       >
-      <div v-show="curFunc === 'angle'" class="position-absolute z-10 left-[50%] top-[50%] transform-translate-x-[-50%] transform-translate-y-[-50%] h-[40%] w-[60%] border-dashed border-[#fff] border-[2px] pointer-events-none">
-        <n-button class="position-absolute bottom-[20px] left-[50%] transform-translate-x-[-50%] pointer-events-auto" @click="setViewConifg">把当前视角设为初始视角</n-button>
-        <div class="w-[10%] h-[10%] position-absolute left-[-3px] top-[-3px] border-0 border-t-[4px] border-l-[4px] border-[#fff] border-solid"></div>
-        <div class="w-[10%] h-[10%] position-absolute left-[-3px] bottom-[-3px] border-0 border-b-[4px] border-l-[4px] border-[#fff] border-solid"></div>
-        <div class="w-[10%] h-[10%] position-absolute right-[-3px] top-[-3px] border-0 border-t-[4px] border-r-[4px] border-[#fff] border-solid"></div>
-        <div class="w-[10%] h-[10%] position-absolute right-[-3px] bottom-[-3px] border-0 border-b-[4px] border-r-[4px] border-[#fff] border-solid"></div>
+      <div
+        v-show="curFunc === 'angle'"
+        class="position-absolute z-10 left-[50%] top-[50%] transform-translate-x-[-50%] transform-translate-y-[-50%] h-[40%] w-[60%] border-dashed border-[#fff] border-[2px] pointer-events-none"
+      >
+        <n-button
+          :color="'#609c65'"
+          class="position-absolute bottom-[20px] left-[50%] transform-translate-x-[-50%] pointer-events-auto"
+          @click="setViewConifg"
+          >把当前视角设为初始视角</n-button
+        >
+        <div
+          class="w-[10%] h-[10%] position-absolute left-[-3px] top-[-3px] border-0 border-t-[4px] border-l-[4px] border-[#fff] border-solid"
+        ></div>
+        <div
+          class="w-[10%] h-[10%] position-absolute left-[-3px] bottom-[-3px] border-0 border-b-[4px] border-l-[4px] border-[#fff] border-solid"
+        ></div>
+        <div
+          class="w-[10%] h-[10%] position-absolute right-[-3px] top-[-3px] border-0 border-t-[4px] border-r-[4px] border-[#fff] border-solid"
+        ></div>
+        <div
+          class="w-[10%] h-[10%] position-absolute right-[-3px] bottom-[-3px] border-0 border-b-[4px] border-r-[4px] border-[#fff] border-solid"
+        ></div>
       </div>
       <section
         ref="panoViewerRef"
@@ -170,7 +186,7 @@ const BaseBoardRef = ref()
 const HotspotBoardRef = ref()
 const paintBoardRef = ref()
 
-const curFunc = ref('angle') // 当前选中的功能
+const curFunc = ref('base') // 当前选中的功能
 
 const initFuncList = [
   { id: 'base', icon: 'i-ri:article-line', label: '基础' },
@@ -181,6 +197,18 @@ const initFuncList = [
 const funcList = computed(() => (curPanoId.value ? initFuncList : [initFuncList[0]]))
 const curEntity = ref(null) // 当前正在编辑的热点实体
 const curEntityId = ref('')
+// 分组列表状态和方法
+const {
+  groups,
+  curGroupId,
+  curPanoId,
+  curGroupData,
+  curPanoData,
+  addGroup,
+  addPano,
+  toggleGroup,
+  togglePano
+} = usePanoGroup()
 const {
   hsList,
   editOriginCnf,
@@ -234,20 +262,7 @@ const {
   setInstance: setInsView,
   setViewConifg,
   toBeginAngle
-} = useView()
-
-// 分组列表状态和方法
-const {
-  groups,
-  curGroupId,
-  curPanoId,
-  curGroupData,
-  curPanoData,
-  addGroup,
-  addPano,
-  toggleGroup,
-  togglePano
-} = usePanoGroup()
+} = useView({ curPanoData })
 
 onMounted(async () => {
   await initKrpanoInstance() // 初始化实例
@@ -493,12 +508,24 @@ watch(
     const imgUrl = panoData.url
     sceneInstance.addSceneInKp({ sceneId, imgUrl }) // 添加主场景
     await sceneInstance.loadSceneAsync(sceneId) // 加载主场景
+    if (!panoData.view) {
+      panoData.view = {
+        minFov: 0,
+        maxFov: 120,
+        curFov: 60,
+        hlookat: 0,
+        vlookat: 0
+      }
+    }
     const { minFov, maxFov, hlookat, vlookat, curFov } = panoData.view
-    viewInstance.setViewFovRange({ fovmin: minFov ? minFov + 30 : 30, fovmax: maxFov ? maxFov + 30 : 150 }) // 设置主场景缩放范围
+    viewInstance.setViewFovRange({
+      fovmin: minFov ? minFov + 30 : 30,
+      fovmax: maxFov ? maxFov + 30 : 150
+    }) // 设置主场景缩放范围
     viewInstance.lookToView({ hlookat, vlookat, fov: curFov + 30 }) // 设置主场景初始位置
-    ViewBoardRef.value.setSubPanoViewer(sceneId, imgUrl) // 添加和加载副场景
-    // ViewBoardRef.value.setConfig({ minFov, maxFov, hlookat, vlookat, curFov }) // 设置场景初始参数 以及副场景的位置和缩放范围
-    hsList.value = cloneDeep(panoData.hotspotList || []) 
+    await ViewBoardRef.value.setSubPanoViewer(sceneId, imgUrl) // 添加和加载副场景
+    ViewBoardRef.value.setConfig({ minFov, maxFov, hlookat, vlookat, fov: curFov }) // 设置场景初始参数 以及副场景的位置和缩放范围
+    hsList.value = cloneDeep(panoData.hotspotList || [])
     graphicsList.value = cloneDeep(panoData.graphicsList || [])
     hsList.value.forEach((hs) => {
       const imgName = getLeafNode(hs.url)

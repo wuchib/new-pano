@@ -1,5 +1,6 @@
+import { cloneDeep } from 'lodash'
 import { ref } from 'vue'
-function useView() {
+function useView({ curPanoData }) {
     const ViewBoardRef = ref()
     let krpano = null
     function changeViewMin(val) {
@@ -16,7 +17,12 @@ function useView() {
     }
     function setViewConifg() {
         const { hlookat, vlookat, fov } = krpano.view;
-        ViewBoardRef.value && ViewBoardRef.value.setConfig({ hlookat, vlookat, fov: fov });
+        if(ViewBoardRef.value){
+            ViewBoardRef.value.setConfig({ hlookat, vlookat, fov: fov - 30 });
+            const config = ViewBoardRef.value.getConfig()
+            curPanoData.value.view = config
+        }
+        
     }
     function setInstance(krp) {
         krpano = krp

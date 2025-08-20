@@ -64,7 +64,6 @@ export class PolygonHs extends CommonHs{
         const { x, y } = this.krpano.screentosphere(firstScreenMouse.x, firstScreenMouse.y)
         rectPoints[0].ath = x
         rectPoints[0].atv = y
-        console.log(hs, rectPoints);
         this.krpano.asyncloop(()=>{
             const kpX = this.krpano.mouse.x
             const kpY = this.krpano.mouse.y
@@ -763,13 +762,11 @@ export class PolygonHs extends CommonHs{
         )
     }
     updateCtrlPoints(hs,customType){
-        console.log(hs,customType);
         const ctrlPoints = this.krpano.hotspot.getArray().filter(h=>h.name.includes(`${customType}_ctrl_`))
         ctrlPoints.forEach(p=>{
             const key = p.name.split('_ctrl_')[1]
             hs.meta.ctrlPoints[key] = { ath: p.ath, atv: p.atv}
         })
-        console.log(this.updateCtrlPointsCb,'callback');
         this.updateCtrlPointsCb && this.updateCtrlPointsCb(hs.meta.ctrlPoints)
     }
     
@@ -1440,9 +1437,19 @@ export class PolygonHs extends CommonHs{
                     const pt = this.krpano.screentosphere(mousex - x, mousey - y) 
                     hsPoint.ath = pt.x
                     hsPoint.atv = pt.y
+                    if(preffix === 'circle'){ // 控制圆形辅助框的控制点移动
+                        const dashFrameHs = this.krpano.hotspot.getItem('dashFrame')
+                        const framePoint = dashFrameHs.point.getItem(`dashFrame_point_${key}`)
+                        const framePoint8 = dashFrameHs.point.getItem(`dashFrame_point_8`)
+                        framePoint.ath = pt.x
+                        framePoint.atv = pt.y
+                        if(key === 0){
+                            framePoint8.ath = pt.x
+                            framePoint8.atv = pt.y
+                        }
+                    }
                     if(['circle','rect'].includes(preffix)) hs.meta.ctrlPoints[key] = { ath: pt.x, atv: pt.y }
                 })
-                
                 this.hsDragCb && this.hsDragCb(0, 0, hs.point.getArray().map( ({ ath, atv })=>({ ath, atv }) ))
                 this.updateCtrlPointsCb && this.updateCtrlPointsCb(hs.meta.ctrlPoints) 
                 this.updateTipPositionCb && this.updateTipPositionCb(hs.meta.tipPosition.ath, hs.meta.tipPosition.atv) 
