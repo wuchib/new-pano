@@ -63,6 +63,9 @@ return [...points, points[0]]
 * 
 */
 export function calcArrowPoints(x1, y1, x2, y2, angleC, angleE, length) {
+  let result = {},arr = ['C','D','E','F']
+  arr.forEach(key=>{ result[key] = { x: x1, y: y1 } })
+  if(x1 === x2 && y1 === y2) return result
   // 将角度转换为弧度
   const angleCInRadians = (Math.PI / 180) * angleC;
   const angleEInRadians = (Math.PI / 180) * angleE;
@@ -93,7 +96,8 @@ export function calcArrowPoints(x1, y1, x2, y2, angleC, angleE, length) {
   const fx = x2 + length * (Math.cos(-angleEInRadians) * unitX + Math.sin(-angleEInRadians) * perpX);
   const fy = y2 + length * (Math.cos(-angleEInRadians) * unitY + Math.sin(-angleEInRadians) * perpY);
 
-  return { C: { x: cx, y: cy }, D: { x: dxCoord, y: dyCoord }, E: { x: ex, y: ey }, F: { x: fx, y: fy } };
+  result = { C: { x: cx, y: cy }, D: { x: dxCoord, y: dyCoord }, E: { x: ex, y: ey }, F: { x: fx, y: fy } };
+  return result
 }
 
 

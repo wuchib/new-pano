@@ -1,8 +1,8 @@
 import { ipcMain, app, dialog, BrowserWindow } from 'electron'
 import path from 'path';
-import { ensureFolderExists, createFile } from '../utils/index'
+import { ensureFolderExists, createFile, deletePaths } from '../utils/index'
 import Scene from "../database/model/scene";
-import { DataSource, Like } from 'typeorm'
+import { DataSource, Like, In } from 'typeorm'
 import fs from 'fs'
 
 /**
@@ -32,12 +32,11 @@ function registerIpc(win, db) {
             const myDataPath = ensureFolderExists(userDataPath, 'myData')
             const scenePath = ensureFolderExists(myDataPath, sceneId)
             const dataJsonPath = createFile(scenePath, 'data.json', sceneData)
-            const scene = new Scene(sceneId, sceneData.base.name, dataJsonPath)
+            const scene = new Scene(sceneId, sceneData.base.name, scenePath)
             sceneTable.insert(scene)
             return dataJsonPath
         } else {
             // 若有此数据，将原有的data.json文件覆盖
-            console.log('编辑数据');
             fs.writeFileSync(row.url, JSON.stringify(sceneData, null, 2), 'utf-8')
             sceneTable.update(row.id, {
                 name: sceneData.base.name
@@ -45,6 +44,26 @@ function registerIpc(win, db) {
         }
         return '保存成功'
     })
+
+    // 删除场景
+    ipcMain.handle('del-scene', async (event, ids) => {
+        if (ids && ids.length > 0) {
+            const sceneTable = db.getRepository('Scene')
+            const rows = await sceneTable.find({
+                where: { id: In(ids) },
+                select: ["url"] // 只选择需要的字段
+            })
+            // 根据urls去删除递归删除文件夹中的东西
+            console.log(rows);
+            await deletePaths(rows.map(r=>r.url))
+            // 删除数据库的字段
+            const res = await sceneTable.delete(ids)
+            return res
+        } else {
+            return '没有id值'
+        }
+    })
+    
 
     // 本地选择图片
     ipcMain.handle('check-local-pano', async (event) => {
@@ -83,7 +102,7 @@ function registerIpc(win, db) {
         const userDataPath = app.getPath('userData')
         const myDataPath = ensureFolderExists(userDataPath, 'myData')
         const scenePath = ensureFolderExists(myDataPath, id)
-        const content = fs.readFileSync(`${scenePath}/data.json`,'utf-8')
+        const content = fs.readFileSync(`${scenePath}/data.json`, 'utf-8')
         return JSON.parse(content)
     })
 }

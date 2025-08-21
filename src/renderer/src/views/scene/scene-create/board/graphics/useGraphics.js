@@ -164,11 +164,8 @@ function useGraphics({
             'circle': () => {
                 return polygonHsInstance.drawCircle({ id, borderColor, borderSize })
             },
-            'brush': () => { },
-            'mark': () => { },
             'line': () => {
                 return polygonHsInstance.drawLine({ id, borderColor, borderSize })
-
             },
             'arrow': () => {
                 return polygonHsInstance.drawArrow({ id, borderColor, borderSize })

@@ -36,3 +36,18 @@ export function createFile(folderPath, fileName, content = '') {
 
 
 
+export async function deletePaths(paths) {
+  const promises = paths.map(async (p) => {
+    try {
+      await fs.promises.rm(p, { recursive: true, force: true });
+      console.log(`✅ 已删除: ${p}`);
+    } catch (err) {
+      console.error(`❌ 删除失败: ${p}`, err.message);
+    }
+  });
+
+  await Promise.all(promises);
+}
+
+
+

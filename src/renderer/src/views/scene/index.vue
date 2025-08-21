@@ -24,7 +24,11 @@
           </div>
         </div>
         <n-button @click="enterAddScene">新增场景</n-button>
-        <n-button>批量删除</n-button>
+        <n-button v-show="!isHandleDel" type="error" :disabled="sceneList?.length === 0" @click="isHandleDel = true">批量删除</n-button>
+        <n-button-group v-show="isHandleDel">
+          <n-button type="primary" @click="delScene"> 确定 </n-button>
+          <n-button @click="cancelDelScene"> 取消 </n-button>
+        </n-button-group>
       </div>
     </div>
     <!-- 列表 -->
@@ -68,6 +72,12 @@
                 </n-tooltip>
               </div>
             </div>
+            <div
+              v-if="isHandleDel"
+              class="position-absolute right-[0px] top-[0px] z-20 bg-[#1a1a1e] px-[4px] rounded-[4px]"
+            >
+              <n-checkbox v-model:checked="scene.checked" />
+            </div>
           </div>
           <div
             class="flex flex-col justify-center gap-[4px] h-[70px] border-0 border-t-[1px] border-solid border-[#414141] px-[12px] text-[#fff]/65"
@@ -85,24 +95,46 @@
       <n-pagination
         v-model:page="pageNo"
         v-model:page-size="pageSize"
-        :page-count="100"
+        :page-count="total"
         show-size-picker
         :page-sizes="[10, 20, 30, 40]"
+        :on-update:page="getSceneList"
+        :on-update:page-size="getSceneList"
       />
     </div>
   </div>
 </template>
 
 <script setup>
+import { useMessage, useDialog } from 'naive-ui'
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { transTime } from '@renderer/utils/index'
 const router = useRouter()
+const dialog = useDialog()
+const message = useMessage()
 const curView = ref('img')
 const views = ref([
   { icon: 'i-ri:multi-image-line', value: 'img' },
   { icon: 'i-ri:file-list-line', value: 'list' }
 ])
+
+const isHandleDel = ref(false)
+
+async function delScene() {
+  const ids = sceneList.value.filter((sc) => sc.checked).map((sc) => sc.id)
+  await window.customApi.delScene(ids)
+  message.success('删除成功')
+  cancelDelScene()
+  getSceneList()
+}
+
+function cancelDelScene() {
+  sceneList.value.forEach((scene) => {
+    scene.checked = false
+  })
+  isHandleDel.value = false
+}
 
 function getRounded(i) {
   const arr = ['rounded-l-[4px]', 'rounded-r-[4px]']
@@ -128,12 +160,12 @@ async function getSceneList() {
     pageSize: pageSize.value
   }
   const res = await window.customApi.getSceneList(postData)
-  sceneList.value = res.rows
+  sceneList.value = res.rows.map((r) => ({ ...r, checked: false }))
   total.value = res.total
 }
 
 // 进入预览
-function enterPreview() {
+function enterPreview(scene) {
   router.push({
     path: '/sceneCreate',
     query: {

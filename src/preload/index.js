@@ -12,6 +12,7 @@ if (process.contextIsolated) {
     contextBridge.exposeInMainWorld('electron', electronAPI)
     contextBridge.exposeInMainWorld('api', api)
     contextBridge.exposeInMainWorld('customApi', {
+      delScene: (ids) => ipcRenderer.invoke('del-scene', ids), // 保存场景
       saveScene: (sceneData) => ipcRenderer.invoke('save-scene', sceneData), // 保存场景
       checkLocalPano: () => ipcRenderer.invoke('check-local-pano'), // 选择本地全景图片
       getSceneList: (listParams) => ipcRenderer.invoke('get-scene-list', listParams), // 选择本地全景图片

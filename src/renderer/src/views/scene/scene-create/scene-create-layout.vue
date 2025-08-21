@@ -120,7 +120,6 @@
           @goBack="goBack"
           @bacthDel="bacthDelGraphics"
         />
-        <!-- 其他功能面板可以在这里添加 -->
       </section>
     </aside>
   </div>
@@ -208,7 +207,7 @@ const {
   addPano,
   toggleGroup,
   togglePano
-} = usePanoGroup()
+} = usePanoGroup({ preSave })
 const {
   hsList,
   editOriginCnf,
@@ -488,9 +487,7 @@ async function saveScene() {
     message.warning('请输入场景名称')
     return
   }
-  curPanoData.value.view = ViewBoardRef.value.getConfig()
-  curPanoData.value.hotspotList = cloneDeep(hsList.value)
-  curPanoData.value.graphicsList = cloneDeep(graphicsList.value)
+  preSave()
   const sceneJson = {
     id: props.status === 'edit' ? props.curScene.id : uuidv4(),
     base,
@@ -498,6 +495,14 @@ async function saveScene() {
   }
   const res = await window.customApi.saveScene(sceneJson)
   if (res) message.success('保存成功')
+}
+
+// 将当前视角、热点、图形信息存到当前场景数据信息下
+function preSave() {
+  if(!curPanoData.value) return
+  curPanoData.value.view = ViewBoardRef.value.getConfig()
+  curPanoData.value.hotspotList = cloneDeep(hsList.value)
+  curPanoData.value.graphicsList = cloneDeep(graphicsList.value)
 }
 
 watch(

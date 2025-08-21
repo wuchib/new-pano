@@ -4,7 +4,7 @@ import { useDialog, NInput } from 'naive-ui'
 import { v4 as uuidv4 } from 'uuid'
 import { cloneDeep } from 'lodash'
 
-function usePanoGroup() {
+function usePanoGroup({preSave = () => {}}) {
     const dialog = useDialog()
     const groups = ref(initGroups) // 分组列表
     const curGroupId = ref('') // 当前选中的分组id
@@ -75,12 +75,15 @@ function usePanoGroup() {
 
     // 切换当前分组下的全景照片
     function togglePano(pano){
+        // 切换场景时自动保存当前照片的数据
+        preSave()
         curPanoId.value = pano.id
-        // emits('togglePano',pano)
     }
 
     // 切换分组
     function toggleGroup(gid){
+        // 切换分组时自动保存当前照片的数据
+        preSave()
         curGroupId.value = gid
     }
     
