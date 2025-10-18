@@ -65,9 +65,9 @@
 
     <!-- 分组列表 -->
     <ul class="overflow-auto position-relative z-1 whitespace-nowrap">
-      <li class="navbar-group-item bg-[#2A2B30] hover:opacity-[0.8]">
+      <li class="navbar-group-item bg-[#2A2B30] hover:opacity-[0.8]" @click="$emit('addGroup')">
         <i class="i-ri:add-line"></i>
-        <span class="text-[14px]" @click="$emit('addGroup')">新增分组</span>
+        <span class="text-[14px]">新增分组</span>
       </li>
 
       <li
