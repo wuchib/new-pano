@@ -4,7 +4,7 @@ export function initKrapno(dom) {
         
         window.embedpano({
             target: dom,
-            xml: '/src/libs/krpano/krpano.xml',
+            xml: '/libs/krpano/krpano.xml',
             id: "krpanoSWFObject",
             bgcolor: "#1a1a1e",
             vars: null,
