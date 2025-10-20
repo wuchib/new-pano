@@ -1,9 +1,8 @@
-// import "reflect-metadata"
 import { app, shell, BrowserWindow, ipcMain } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
-// import { AppDataSource } from './database/index'
+import { AppDataSource } from './database/index'
 // import Scene from "./database/model/scene";
 import registerIpc from './ipc/index'
 
@@ -52,7 +51,7 @@ function createWindow() {
 app.whenReady().then(async () => {
   // Set app user model id for windows
 
-  // dbIns = await AppDataSource.initialize()
+  dbIns = await AppDataSource.initialize()
 
   electronApp.setAppUserModelId('com.electron')
 
@@ -72,8 +71,7 @@ app.whenReady().then(async () => {
 
   // 注册ipc,构建通信
   createWindow()
-  // registerIpc(mainWindow, dbIns)
-  registerIpc(mainWindow, undefined)
+  registerIpc(mainWindow, dbIns)
 
   app.on('activate', function () {
     // On macOS it's common to re-create a window in the app when the
