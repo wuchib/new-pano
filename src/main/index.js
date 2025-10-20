@@ -1,8 +1,9 @@
+// import "reflect-metadata"
 import { app, shell, BrowserWindow, ipcMain } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
-import { AppDataSource } from './database/index'
+// import { AppDataSource } from './database/index'
 // import Scene from "./database/model/scene";
 import registerIpc from './ipc/index'
 
@@ -15,16 +16,20 @@ function createWindow() {
     height: 670,
     show: false,
     autoHideMenuBar: true,
+
     ...(process.platform === 'linux' ? { icon } : {}),
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
       sandbox: false,
-      webSecurity: false   // 粗暴关闭同源策略
+      webSecurity: false,   // 粗暴关闭同源策略
+      devTools: true
     }
   })
-
+  mainWindow.webContents.openDevTools()
   mainWindow.on('ready-to-show', () => {
     mainWindow.show()
+    mainWindow.webContents.openDevTools()
+
   })
 
   mainWindow.webContents.setWindowOpenHandler((details) => {
@@ -47,12 +52,7 @@ function createWindow() {
 app.whenReady().then(async () => {
   // Set app user model id for windows
 
-  //===== 测试一下数据库连接以及插入数据 start
-  dbIns = await AppDataSource.initialize()
-  // const repository = dbIns.getRepository('Scene')
-  // const scene1 = new Scene(null, "cbiu", "12345")
-  // repository.insert(scene1)
-  //===== 测试一下数据库连接以及插入数据 end
+  // dbIns = await AppDataSource.initialize()
 
   electronApp.setAppUserModelId('com.electron')
 
@@ -72,7 +72,8 @@ app.whenReady().then(async () => {
 
   // 注册ipc,构建通信
   createWindow()
-  registerIpc(mainWindow, dbIns)
+  // registerIpc(mainWindow, dbIns)
+  registerIpc(mainWindow, undefined)
 
   app.on('activate', function () {
     // On macOS it's common to re-create a window in the app when the

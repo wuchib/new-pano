@@ -159,9 +159,9 @@ async function getSceneList() {
     pageNo: pageNo.value,
     pageSize: pageSize.value
   }
-  const res = await window.customApi.getSceneList(postData)
-  sceneList.value = res.rows.map((r) => ({ ...r, checked: false }))
-  total.value = res.total
+  // const res = await window.customApi.getSceneList(postData)
+  // sceneList.value = res.rows.map((r) => ({ ...r, checked: false }))
+  // total.value = res.total
 }
 
 // 进入预览

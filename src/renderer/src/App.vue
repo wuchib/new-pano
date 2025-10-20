@@ -1,8 +1,8 @@
 <template>
-  <n-config-provider class="w-full h-full" :theme="darkTheme" :theme-overrides="themeOverrides">
+  <n-config-provider class="w-full h-full father" :theme="darkTheme" :theme-overrides="themeOverrides">
     <n-dialog-provider>
       <n-message-provider>
-        <div class="w-full h-full">
+        <div class="w-full h-full son">
           <RouterView />
         </div>
       </n-message-provider>
