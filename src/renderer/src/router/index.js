@@ -1,4 +1,4 @@
-import { createRouter, createWebHistory } from 'vue-router'
+import { createRouter, createWebHashHistory } from 'vue-router'
 import Layout from '@renderer/views/layout/index.vue'
 import SceneCreate from '@renderer/views/scene/scene-create/index.vue'
 import SceneManage from '@renderer/views/scene/index.vue'
