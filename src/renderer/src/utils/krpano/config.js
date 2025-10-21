@@ -3,10 +3,10 @@ export default ()=> {
     const SCROLL = 'scroll_'
     return {
         // 模板文件
-        TEMPLATE_XML: '/libs/krpano/krpano.xml', 
+        TEMPLATE_XML: './libs/krpano/krpano.xml', 
 
         // 插件路径
-        PLUGIN_URL: '/libs/krpano/plugin', 
+        PLUGIN_URL: './libs/krpano/plugin', 
 
         // 空场景名称
         EMPTY_SCENE_NAME: 'emptyScene', 
